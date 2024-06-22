@@ -435,7 +435,7 @@ const StudentForm = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2">Father's Mobile</label>
+          <label className="block text-sm font-bold mb-2">Father&apos;s Mobile</label>
           <input
             name="mobileFat"
             value={formData.mobileFat}
@@ -445,7 +445,7 @@ const StudentForm = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2">Mother's Mobile</label>
+          <label className="block text-sm font-bold mb-2">Mother&apos;s Mobile</label>
           <input
             name="mobileMot"
             value={formData.mobileMot}

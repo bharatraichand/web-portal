@@ -1,7 +1,10 @@
+import Dashboard from "@/components/Dashboard";
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <button class="btn btn-primary">Button</button>
+    <div className="min-h-screen flex items-center justify-center">
+      <Dashboard />
+    </div>
   );
 }

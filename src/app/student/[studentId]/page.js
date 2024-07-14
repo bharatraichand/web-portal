@@ -4,11 +4,10 @@ import dummyData from '../../../data/dummyData';
 export async function generateStaticParams() {
   const students = dummyData;
 
-  return students.map(student=>{
-    studentId: student.id;
-  })
+  return students.map(student=>({
+    studentId: student.id.toString(),
+  }))
 }
-
 
 export default function Page ({params}) {
   const { studentId } = params;

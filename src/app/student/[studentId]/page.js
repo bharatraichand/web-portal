@@ -235,4 +235,18 @@ const StudentProfile = () => {
   );
 };
 
+// Fetch the list of student IDs to generate paths
+export async function getStaticPaths() {
+  // Fetch data or use dummy data
+  const students = dummyData;
+
+  // Generate paths for each student
+  const paths = students.map(student => ({
+    params: { studentId: student.id.toString() },
+  }));
+
+  return { paths, fallback: true };
+}
+
+
 export default StudentProfile;

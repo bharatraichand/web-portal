@@ -5,12 +5,16 @@ import dummyData from '../data/dummyData';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as XLSX from 'xlsx';
+import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [showPDC, setShowPDC] = useState({});
+
+  const router = useRouter();
 
   useEffect(() => {
     // Load dummy data
@@ -18,17 +22,30 @@ const Dashboard = () => {
     setFilteredStudents(dummyData);
   }, []);
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+    const currStudents = handleFilterChange({ target: { value: filter } });
+    
+    if (value !== "") {
+      const filtered = currStudents.filter(student => 
+        student.studentName.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredStudents(filtered);
+    }
+  };
+
   const handleFilterChange = (e) => {
     const value = e.target.value;
     setFilter(value);
+
+    let filtered = students;
     
-    if (value === "all") {
-      setFilteredStudents(students);
-    } else if (value === "dueSoon") {
+    if (value === "dueSoon") {
       const today = new Date();
       const sevenDaysLater = new Date();
       sevenDaysLater.setDate(today.getDate() + 7);
-      const filtered = students.filter(student => {
+       filtered = students.filter(student => {
         return student.pdcChecks.some(check => {
           // Parse the check date string "dd/mm/yy" into day, month, and year
           const [day, month, year] = check.pdcChqDate.split('/');
@@ -36,12 +53,11 @@ const Dashboard = () => {
           return checkDate >= today && checkDate <= sevenDaysLater;
         });
       });
-      setFilteredStudents(filtered);
     } else if (value === "currentMonth") {
       const today = new Date();
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
       const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      const filtered = students.filter(student => {
+      filtered = students.filter(student => {
         return student.pdcChecks.some(check => {
           // Parse the check date string "dd/mm/yy" into day, month, and year
           const [day, month, year] = check.pdcChqDate.split('/');
@@ -49,15 +65,17 @@ const Dashboard = () => {
           return checkDate >= startOfMonth && checkDate <= endOfMonth;
         });
       });
-      setFilteredStudents(filtered);
+      
     }
+    setFilteredStudents(filtered);
+    return filtered;
     // Add more filters if needed
   };
   
 
   const handleCollected = (studentId, chqNo) => {
     // Mark PDC cheque as collected
-    setStudents(prevStudents => prevStudents.map(student => {
+    const updatedStudents = filteredStudents.map(student => {
       if (student.id === studentId) {
         return {
           ...student,
@@ -67,13 +85,14 @@ const Dashboard = () => {
         };
       }
       return student;
-    }));
+    })
+    setFilteredStudents(updatedStudents);
     toast.success('PDC Cheque collected');
   };
 
   const handleUndo = (studentId, chqNo) => {
     // Undo PDC cheque collection
-    setStudents(prevStudents => prevStudents.map(student => {
+    const updatedStudents = filteredStudents.map(student => {
       if (student.id === studentId) {
         return {
           ...student,
@@ -83,7 +102,9 @@ const Dashboard = () => {
         };
       }
       return student;
-    }));
+    })
+    setFilteredStudents(updatedStudents);
+    
     toast.info('PDC Cheque collection undone');
   };
 
@@ -262,6 +283,13 @@ const Dashboard = () => {
             <option value="currentMonth">Current Month PDC</option>
             {/* Add more filters as needed */}
           </select>
+          <input
+        type="text"
+        value={search}
+        onChange={handleSearchChange}
+        placeholder="Search students..."
+        className="mb-4 ml-8 p-1.5 border rounded"
+      />
         </div>
         {filter === "dueSoon" && (
           <button
@@ -272,11 +300,18 @@ const Dashboard = () => {
           </button>
         )}
         <button
+          onClick={() => router.push("/form")}
+          className="mb-4 px-4 py-2 bg-green-800 text-white rounded"
+        >
+          Add Student
+        </button>
+        <button
           onClick={() => handleExport(filteredStudents)}
           className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
         >
           Export to Excel
         </button>
+        
       </div>
       <div className="mb-4">
         <span className="font-bold">Total PDC Amount for this Month: </span>
@@ -286,17 +321,17 @@ const Dashboard = () => {
         <thead>
           <tr>
             <th className="border-2 border-slate-400 px-4 py-2">Student Name</th>
-            <th className="border-2 border-slate-400 px-4 py-2">Course End Date</th>
+            <th className="border-2 border-slate-400 px-0 py-2">Course End Date(mm/yyyy)</th>
             <th className="border-2 border-slate-400 px-4 py-2">Loan Given (Amount)</th>
-            <th className="border-2 border-slate-400 px-4 py-2">PDC Cheques</th>
+            <th className="border-2 border-slate-400 px-0 py-2">PDC Cheques</th>
           </tr>
         </thead>
         <tbody>
           {filteredStudents.map(student => (
             <tr key={student.id}>
-              <td className="border-2 border-slate-400 px-4 py-2">{student.studentName}</td>
+              <td className="border-2 border-slate-400 px-4 py-2 cursor-pointer" onClick={()=>router.push(`/student/${student.id}`)}>{student.studentName}</td>
               <td className="border-2 border-slate-400 px-4 py-2">{student.courseEndDate}</td>
-              <td className="border-2 border-slate-400 px-4 py-2">{student.loanGiven}</td>
+              <td className="border-2 border-slate-400 px-4 py-2">{student.loanGiven}</td>  
               <td className="border-2 border-slate-400 px-4 py-2 ">
                 <button
                   onClick={() => handleTogglePDC(student.id)}
@@ -316,14 +351,15 @@ const Dashboard = () => {
                         </div>
                         <button
                           onClick={() => handleCollected(student.id, check.pdcChqNo)}
-                          className={`mr-2 px-2 py-1 ${check.collected ? "bg-green-500" : "bg-red-500"} text-white rounded`}
+                          className={`mr-2 px-2 py-1 ${check.collected ? "bg-green-400" : "bg-red-400"} text-white rounded`}
+                          disabled={check.collected}
                         >
-                          {check.collected ? "Collected" : "Collect"}
+                          {check?.collected==true ? "Collected" : "Collect"}
                         </button>
-                        {check.collected && (
+                        {check?.collected && (
                           <button
                             onClick={() => handleUndo(student.id, check.pdcChqNo)}
-                            className="px-2 py-1 bg-yellow-500 text-white rounded"
+                            className="px-2 py-1 bg-yellow-400 text-white rounded"
                           >
                             Undo
                           </button>
@@ -337,6 +373,7 @@ const Dashboard = () => {
           ))}
         </tbody>
       </table>
+      <p className="mt-8 text-sm">**click on the student&apos;s name to view their complete profile</p>
     </div>
   );
 };

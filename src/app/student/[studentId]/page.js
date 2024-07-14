@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import students from '../../../data/dummyData';
 import { useParams, useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
+import dummyData from '../../../data/dummyData';
 
 const StudentProfile = () => {
   const { studentId } = useParams();
@@ -235,17 +236,12 @@ const StudentProfile = () => {
   );
 };
 
-// Fetch the list of student IDs to generate paths
-export async function getStaticPaths() {
-  // Fetch data or use dummy data
+export async function generateStaticParams() {
   const students = dummyData;
 
-  // Generate paths for each student
-  const paths = students.map(student => ({
-    params: { studentId: student.id.toString() },
-  }));
-
-  return { paths, fallback: true };
+  return students.map(student=>{
+    return {studentId: student.id};
+  })
 }
 
 

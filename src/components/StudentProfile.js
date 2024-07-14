@@ -4,12 +4,11 @@ import React, { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import students from '../data/dummyData';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 
 
-const StudentProfile = () => {
-  const { studentId } = useParams();
+const StudentProfile = ({studentId}) => {
   const [student, setStudent] = useState(students.find(s => s.id === parseInt(studentId)));
   const router = useRouter();
 

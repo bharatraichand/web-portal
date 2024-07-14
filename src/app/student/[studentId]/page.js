@@ -1,14 +1,6 @@
 import StudentProfile from "@/components/StudentProfile";
 import dummyData from '../../../data/dummyData';
 
-export async function generateStaticParams() {
-  const students = dummyData;
-
-  return students.map(student=>{
-    studentId: student.id;
-  })
-}
-
 export default function Profile ({params}) {
   const { studentId } = params;
   return (
@@ -16,6 +8,14 @@ export default function Profile ({params}) {
       <StudentProfile studentId={studentId} />
     </div>
   )
+}
+
+export async function generateStaticParams() {
+  const students = dummyData;
+
+  return students.map(student=>{
+    studentId: student.id;
+  })
 }
 
 

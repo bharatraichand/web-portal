@@ -1,16 +1,25 @@
 "use client"
-// StudentProfile.js
-import React, { useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import students from '../data/dummyData';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
+import useStudentsData from '@/functions/useStudentsData';
+import axios from 'axios';
 
 
 const StudentProfile = ({studentId}) => {
-  const [student, setStudent] = useState(students.find(s => s.id === parseInt(studentId)));
+  let students = useStudentsData();
+  const [student, setStudent] = useState(null);
   const router = useRouter();
+
+  console.log(parseInt(studentId))
+  console.log(students)
+
+  useEffect(()=>{
+    setStudent(students.find(s => s.id == parseInt(studentId)))
+  },[students])
 
   if (!student) {
     return <div>Student not found</div>;
@@ -112,32 +121,68 @@ const StudentProfile = ({studentId}) => {
     XLSX.writeFile(wb, "StudentData.xlsx");
   };
 
-  const handleSendReminder = () => {
+  const handleSendReminder =  () => {
     // Implement your reminder sending logic here
     toast.success(`Reminder sent to ${student.studentName}`);
   };
 
-  const handleCollected = (studentId, chqNo) => {
-    // Mark PDC cheque as collected
-    const updatedStudent = {
-      ...student,
-      pdcChecks: student.pdcChecks.map(check =>
-        check.pdcChqNo === chqNo ? { ...check, collected: true } : check
-      )
+  const handleCollected = async ( chqNo) => {
+
+    try {
+      // Find the PDC ID from the student data
+      const pdcCheck = student?.pdcChecks.find(check => check.pdcChqNo === chqNo);
+  
+      if (!pdcCheck) {
+        toast.error('PDC Cheque not found');
+        return;
+      }
+  
+      // Update PDC state in the backend
+      await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
+  
+      // Update the local state
+      const updatedStudent = {
+        ...student,
+        pdcChecks: student.pdcChecks.map(check =>
+          check.pdcChqNo === chqNo ? { ...check, collected: true } : check
+        )
+      }
+      setStudent(updatedStudent);
+      toast.success('PDC Cheque collected');
+    } catch (error) {
+      console.log(error)
+      toast.error('Error updating PDC Cheque state');
     }
-    setStudent(updatedStudent);
-    toast.success('PDC Cheque collected');
+
   };
 
-  const handleUndo = (studentId, chqNo) => {
-    const updatedStudent = {
-      ...student,
-          pdcChecks: student.pdcChecks.map(check =>
-            check.pdcChqNo === chqNo ? { ...check, collected: false } : check
-          )
+  const handleUndo = async ( chqNo) => {
+    
+    try {
+      // Find the PDC ID from the student data
+      const pdcCheck = student?.pdcChecks.find(check => check.pdcChqNo === chqNo);
+  
+      if (!pdcCheck) {
+        toast.error('PDC Cheque not found');
+        return;
+      }
+  
+      // Update PDC state in the backend
+      await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
+  
+      // Update the local state
+      const updatedStudent = {
+        ...student,
+            pdcChecks: student.pdcChecks.map(check =>
+              check.pdcChqNo === chqNo ? { ...check, collected: false } : check
+            )
+      }
+      setStudent(updatedStudent);
+      toast.info('PDC Cheque collection undone');
+      toast.info('PDC Cheque collection undone');
+    } catch (error) {
+      toast.error('Error undoing PDC Cheque collection');
     }
-    setStudent(updatedStudent);
-    toast.info('PDC Cheque collection undone');
 
   }
 
@@ -194,7 +239,7 @@ const StudentProfile = ({studentId}) => {
                   <p><strong>Bank Name:</strong> {check.pdcBankName}</p>
                   <p><strong>Cheque Date:</strong> {check.pdcChqDate}</p>
                   <button
-                    onClick={() => handleCollected(student.id, check.pdcChqNo)}
+                    onClick={() => handleCollected( check.pdcChqNo)}
                     className={`mr-2 mt-2 px-2 py-1 ${check.collected ? "bg-green-400" : "bg-red-400"} text-white rounded`}
                     disabled={check.collected}
                   >
@@ -202,7 +247,7 @@ const StudentProfile = ({studentId}) => {
                   </button>
                   {check?.collected && (
                     <button
-                      onClick={() => handleUndo(student.id, check.pdcChqNo)}
+                      onClick={() => handleUndo( check.pdcChqNo)}
                       className="px-2 py-1 bg-yellow-400 text-white rounded"
                     >
                       Undo

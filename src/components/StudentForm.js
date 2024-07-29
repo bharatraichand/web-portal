@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as XLSX from 'xlsx';
+import axios from 'axios';
 
 const StudentForm = () => {
   const [formData, setFormData] = useState({
@@ -105,11 +106,56 @@ const StudentForm = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log(formData);
-      toast.success('Form submitted successfully!');
+      const {
+        studentName, email, currentStudy, courseDuration, courseEndDate,
+        initialChqDate, initialBankName, initialChqNo, loanGiven,
+        blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
+        mobileStud, mobileFat, mobileMot, pdcChecks
+      } = formData;
+  
+      // Format data for the backend
+      const formattedData = {
+        general: {
+          name: studentName,
+          email,
+          current_study: currentStudy,
+          course_duration: parseInt(courseDuration, 10),
+          course_end_date: courseEndDate,
+          mobile_stu: mobileStud,
+          mobile_fat: mobileFat,
+          mobile_mot: mobileMot,
+          blank_chq_amount: blankChqAmount,
+          blank_chq_date: blankChqDate,
+          blank_chq_bank_name: blankChqBankName,
+          blank_chq_no: blankChqNo,
+          initial_chq_date: initialChqDate,
+          initial_bank_name: initialBankName,
+          initial_chq_no: initialChqNo,
+          loanamt: loanGiven
+        },
+        pdc: pdcChecks.map(check => ({
+          pdc_amount: check.pdcAmount,
+          pdc_chq_no: check.pdcChqNo,
+          pdc_bank_name: check.pdcBankName,
+          pdc_chq_date: check.pdcChqDate
+        }))
+      };
+      
+  
+      try {
+        const response = await axios.post('http://localhost:8000/api/students/add/', formattedData);
+        if (response.status === 201) {
+          toast.success('Form submitted successfully!');
+        } else {
+          toast.error('Failed to submit the form. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error submitting the form:', error);
+        toast.error('An error occurred while submitting the form. Please try again.');
+      }
     }
   };
 
@@ -221,7 +267,7 @@ const StudentForm = () => {
   
 
   return (
-    <form onSubmit={handleSubmit} className="p-6  shadow-md w-full max-w-7xl mx-auto">
+    <form className="p-6  shadow-md w-full max-w-7xl mx-auto">
       <ToastContainer />
       <button
         onClick={() => router.push('/')}
@@ -464,7 +510,7 @@ const StudentForm = () => {
         </div>
       </div>
       <div className="flex justify-between">
-        <button type="submit" className="btn btn-primary">Submit</button>
+        <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
         <button type="button" onClick={handleExport} className="btn btn-secondary">Export as Excel</button>
       </div>
     </form>

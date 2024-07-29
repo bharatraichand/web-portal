@@ -6,9 +6,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as XLSX from 'xlsx';
 import { useRouter } from 'next/navigation';
+import useStudentsData from '@/functions/useStudentsData';
+import axios from 'axios';
 
 const Dashboard = () => {
-  const [students, setStudents] = useState([]);
+  const students = useStudentsData();
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -18,9 +20,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Load dummy data
-    setStudents(dummyData);
-    setFilteredStudents(dummyData);
-  }, []);
+    setFilteredStudents(students);
+  }, [students]);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -73,42 +74,75 @@ const Dashboard = () => {
   };
   
 
-  const handleCollected = (studentId, chqNo) => {
-    // Mark PDC cheque as collected
-    const updatedStudents = filteredStudents.map(student => {
-      if (student.id === studentId) {
-        return {
-          ...student,
-          pdcChecks: student.pdcChecks.map(check =>
-            check.pdcChqNo === chqNo ? { ...check, collected: true } : check
-          )
-        };
+  const handleCollected = async (studentId, chqNo) => {
+    try {
+      // Find the PDC ID from the student data
+      const student = filteredStudents.find(student => student.id === studentId);
+      const pdcCheck = student?.pdcChecks.find(check => check.pdcChqNo === chqNo);
+  
+      if (!pdcCheck) {
+        toast.error('PDC Cheque not found');
+        return;
       }
-      return student;
-    })
-    setFilteredStudents(updatedStudents);
-    toast.success('PDC Cheque collected');
+  
+      // Update PDC state in the backend
+      await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
+  
+      // Update the local state
+      const updatedStudents = filteredStudents.map(student => {
+        if (student.id === studentId) {
+          return {
+            ...student,
+            pdcChecks: student.pdcChecks.map(check =>
+              check.pdcChqNo === chqNo ? { ...check, collected: true } : check
+            )
+          };
+        }
+        return student;
+      });
+  
+      setFilteredStudents(updatedStudents);
+      toast.success('PDC Cheque collected');
+    } catch (error) {
+      toast.error('Error updating PDC Cheque state');
+    }
   };
 
-  const handleUndo = (studentId, chqNo) => {
-    // Undo PDC cheque collection
-    const updatedStudents = filteredStudents.map(student => {
-      if (student.id === studentId) {
-        return {
-          ...student,
-          pdcChecks: student.pdcChecks.map(check =>
-            check.pdcChqNo === chqNo ? { ...check, collected: false } : check
-          )
-        };
+  const handleUndo = async (studentId, chqNo) => {
+    try {
+      // Find the PDC ID from the student data
+      const student = filteredStudents.find(student => student.id === studentId);
+      const pdcCheck = student?.pdcChecks.find(check => check.pdcChqNo === chqNo);
+  
+      if (!pdcCheck) {
+        toast.error('PDC Cheque not found');
+        return;
       }
-      return student;
-    })
-    setFilteredStudents(updatedStudents);
-    
-    toast.info('PDC Cheque collection undone');
+  
+      // Update PDC state in the backend
+      await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
+  
+      // Update the local state
+      const updatedStudents = filteredStudents.map(student => {
+        if (student.id === studentId) {
+          return {
+            ...student,
+            pdcChecks: student.pdcChecks.map(check =>
+              check.pdcChqNo === chqNo ? { ...check, collected: false } : check
+            )
+          };
+        }
+        return student;
+      });
+  
+      setFilteredStudents(updatedStudents);
+      toast.info('PDC Cheque collection undone');
+    } catch (error) {
+      toast.error('Error undoing PDC Cheque collection');
+    }
   };
 
-  const handleSendReminders = () => {
+  const handleSendReminders = async () => {
     const today = new Date();
     const sevenDaysLater = new Date();
     sevenDaysLater.setDate(today.getDate() + 7);
@@ -120,8 +154,27 @@ const Dashboard = () => {
       });
     });
     const studentNames = dueSoonStudents.map(student => student.studentName).join(', ');
-    console.log(`Sending reminders to: ${studentNames}`);
-    toast.info(`Reminders sent to: ${studentNames}`);
+    try {
+      // Make API call to send reminders
+      if(dueSoonStudents.length>0){
+        const response = await axios.post('http://localhost:8000/api/send_pdc_reminders/');
+  
+        if (response.data.status === 'success') {
+          console.log(`Sending reminders to: ${studentNames}`);
+          toast.info(`Reminders sent to: ${studentNames}`);
+        } else {
+          toast.error(`Error: ${response.data.message}`);
+        }
+      }
+
+      else{
+        toast.info("No students PDC in next 7 days");
+      }
+      
+    } catch (error) {
+      toast.error('Error sending reminders');
+    }
+
   };
 
   const handleTogglePDC = (id) => {

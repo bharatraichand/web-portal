@@ -14,9 +14,6 @@ const StudentProfile = ({studentId}) => {
   const [student, setStudent] = useState(null);
   const router = useRouter();
 
-  console.log(parseInt(studentId))
-  console.log(students)
-
   useEffect(()=>{
     setStudent(students.find(s => s.id == parseInt(studentId)))
   },[students])
@@ -269,11 +266,17 @@ const StudentProfile = ({studentId}) => {
           Export to Excel
         </button>
         <button
+          onClick={router.push(`/update/${student.id}`)}
+          className="bg-green-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mr-2"
+        >
+          Update Profile
+        </button>
+        {/* <button
           onClick={handleSendReminder}
           className="bg-green-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
         >
           Send Reminder
-        </button>
+        </button> */}
       </div>
     </div>
   );

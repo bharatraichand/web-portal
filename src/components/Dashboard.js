@@ -15,6 +15,8 @@ const Dashboard = () => {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [showPDC, setShowPDC] = useState({});
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const router = useRouter();
 
@@ -27,9 +29,9 @@ const Dashboard = () => {
     const value = e.target.value;
     setSearch(value);
     const currStudents = handleFilterChange({ target: { value: filter } });
-    
+
     if (value !== "") {
-      const filtered = currStudents.filter(student => 
+      const filtered = currStudents.filter(student =>
         student.studentName.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredStudents(filtered);
@@ -41,12 +43,12 @@ const Dashboard = () => {
     setFilter(value);
 
     let filtered = students;
-    
+
     if (value === "dueSoon") {
       const today = new Date();
       const sevenDaysLater = new Date();
       sevenDaysLater.setDate(today.getDate() + 7);
-       filtered = students.filter(student => {
+      filtered = students.filter(student => {
         return student.pdcChecks.some(check => {
           // Parse the check date string "dd/mm/yy" into day, month, and year
           const [day, month, year] = check.pdcChqDate.split('/');
@@ -66,28 +68,30 @@ const Dashboard = () => {
           return checkDate >= startOfMonth && checkDate <= endOfMonth;
         });
       });
-      
+
     }
     setFilteredStudents(filtered);
+    setStartDate('');
+    setEndDate('');
     return filtered;
     // Add more filters if needed
   };
-  
+
 
   const handleCollected = async (studentId, chqNo) => {
     try {
       // Find the PDC ID from the student data
       const student = filteredStudents.find(student => student.id === studentId);
       const pdcCheck = student?.pdcChecks.find(check => check.pdcChqNo === chqNo);
-  
+
       if (!pdcCheck) {
         toast.error('PDC Cheque not found');
         return;
       }
-  
+
       // Update PDC state in the backend
       await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
-  
+
       // Update the local state
       const updatedStudents = filteredStudents.map(student => {
         if (student.id === studentId) {
@@ -100,7 +104,7 @@ const Dashboard = () => {
         }
         return student;
       });
-  
+
       setFilteredStudents(updatedStudents);
       toast.success('PDC Cheque collected');
     } catch (error) {
@@ -113,15 +117,15 @@ const Dashboard = () => {
       // Find the PDC ID from the student data
       const student = filteredStudents.find(student => student.id === studentId);
       const pdcCheck = student?.pdcChecks.find(check => check.pdcChqNo === chqNo);
-  
+
       if (!pdcCheck) {
         toast.error('PDC Cheque not found');
         return;
       }
-  
+
       // Update PDC state in the backend
       await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
-  
+
       // Update the local state
       const updatedStudents = filteredStudents.map(student => {
         if (student.id === studentId) {
@@ -134,7 +138,7 @@ const Dashboard = () => {
         }
         return student;
       });
-  
+
       setFilteredStudents(updatedStudents);
       toast.info('PDC Cheque collection undone');
     } catch (error) {
@@ -149,16 +153,16 @@ const Dashboard = () => {
     const dueSoonStudents = students.filter(student => {
       return student.pdcChecks.some(check => {
         const [day, month, year] = check.pdcChqDate.split('/');
-          const checkDate = new Date(`${month}/${day}/${year}`);
+        const checkDate = new Date(`${month}/${day}/${year}`);
         return checkDate >= today && checkDate <= sevenDaysLater;
       });
     });
     const studentNames = dueSoonStudents.map(student => student.studentName).join(', ');
     try {
       // Make API call to send reminders
-      if(dueSoonStudents.length>0){
+      if (dueSoonStudents.length > 0) {
         const response = await axios.post('http://localhost:8000/api/send_pdc_reminders/');
-  
+
         if (response.data.status === 'success') {
           console.log(`Sending reminders to: ${studentNames}`);
           toast.info(`Reminders sent to: ${studentNames}`);
@@ -167,10 +171,10 @@ const Dashboard = () => {
         }
       }
 
-      else{
+      else {
         toast.info("No students PDC in next 7 days");
       }
-      
+
     } catch (error) {
       toast.error('Error sending reminders');
     }
@@ -186,7 +190,7 @@ const Dashboard = () => {
 
   const handleExport = (students) => {
     const rows = [];
-    
+
     // Create headers
     const header = [
       "Sr.", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
@@ -195,7 +199,7 @@ const Dashboard = () => {
       "Blank Cheque Amount", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
       "Student Mobile", "Father's Mobile", "Mother's Mobile"
     ];
-    
+
     students.forEach((student, index) => {
       const {
         studentName, email, currentStudy, courseDuration, courseEndDate,
@@ -203,7 +207,7 @@ const Dashboard = () => {
         blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
         mobileStud, mobileFat, mobileMot, pdcChecks
       } = student;
-      
+
       // Create the main row with basic student information
       const mainData = {
         "Sr.": index + 1,
@@ -224,10 +228,10 @@ const Dashboard = () => {
         "Father's Mobile": mobileFat,
         "Mother's Mobile": mobileMot
       };
-  
+
       // Add main row to the rows array
       rows.push(mainData);
-      
+
       // Create an array for the PDC data, to be added to the main row
       const pdcData = pdcChecks.map((check, index) => ({
         "PDC Cheque Amount": check.pdcAmount,
@@ -235,7 +239,7 @@ const Dashboard = () => {
         "PDC Bank Name": check.pdcBankName,
         "PDC Cheque Date": check.pdcChqDate
       }));
-  
+
       // Add PDC data as separate rows with empty values for non-PDC fields
       pdcData.forEach((pdc) => {
         rows.push({
@@ -260,16 +264,16 @@ const Dashboard = () => {
         });
       });
     });
-  
+
     // Convert the rows to a worksheet
     const ws = XLSX.utils.json_to_sheet(rows, { header });
-  
+
     // Function to calculate the maximum width of a column
     const getMaxWidth = (arr, header) => {
       const maxLength = Math.max(...arr.map(val => (val ? val.toString().length : 0)));
       return Math.max(maxLength, header.length) * 6; // Multiply by 10 to get the width in pixels
     };
-  
+
     // Function to calculate the maximum height of a row
     const getMaxHeight = (rows) => {
       const maxLineCount = Math.max(...rows.map(row => Object.values(row).reduce((maxLines, cell) => {
@@ -278,17 +282,17 @@ const Dashboard = () => {
       }, 1)));
       return maxLineCount * 20; // Multiply by 20 to get the height in pixels
     };
-  
+
     // Set column widths dynamically based on content
     ws['!cols'] = header.map((h, i) => ({
       wpx: getMaxWidth(rows.map(row => row[h]), h)
     }));
-  
+
     // Set row heights dynamically based on content
     ws['!rows'] = rows.map(() => ({
       hpx: getMaxHeight(rows)
     }));
-  
+
     // Apply horizontal alignment to headers
     header.forEach((h, i) => {
       ws[XLSX.utils.encode_cell({ c: i, r: 0 })].s = {
@@ -298,7 +302,7 @@ const Dashboard = () => {
         }
       };
     });
-  
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "StudentData");
     XLSX.writeFile(wb, "StudentData.xlsx");
@@ -313,7 +317,7 @@ const Dashboard = () => {
     students.forEach(student => {
       student.pdcChecks.forEach(check => {
         const [day, month, year] = check.pdcChqDate.split('/');
-          const checkDate = new Date(`${month}/${day}/${year}`);
+        const checkDate = new Date(`${month}/${day}/${year}`);
         if (checkDate >= startOfMonth && checkDate <= endOfMonth && !check.collected) {
           total += check.pdcAmount;
         }
@@ -321,6 +325,25 @@ const Dashboard = () => {
     });
 
     return total;
+  };
+
+  const filterStudentsByDate = (students, startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    return students.filter(student => {
+      return student.pdcChecks.some(check => {
+        const [day, month, year] = check.pdcChqDate.split('/');
+        const checkDate = new Date(`${month}/${day}/${year}`);
+        return checkDate >= start && checkDate <= end;
+      });
+    });
+  };
+
+  const handleFilterByDate = () => {
+    const filtered = filterStudentsByDate(students, startDate, endDate);
+    setFilteredStudents(filtered);
+    setFilter("all")
   };
 
   return (
@@ -337,12 +360,12 @@ const Dashboard = () => {
             {/* Add more filters as needed */}
           </select>
           <input
-        type="text"
-        value={search}
-        onChange={handleSearchChange}
-        placeholder="Search students..."
-        className="mb-4 ml-8 p-1.5 border rounded"
-      />
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search students..."
+            className="mb-4 ml-8 p-1.5 border rounded"
+          />
         </div>
         {filter === "dueSoon" && (
           <button
@@ -364,12 +387,41 @@ const Dashboard = () => {
         >
           Export to Excel
         </button>
-        
+
       </div>
       <div className="mb-4">
         <span className="font-bold">Total PDC Amount for this Month: </span>
         {calculateTotalPDCForMonth()}
       </div>
+      <div className="flex flex-col md:flex-row items-center justify-between p-4  rounded-lg shadow-lg">
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
+          <label className="flex flex-col md:flex-row items-start md:items-center w-full">
+            <span className="text-gray-400 font-medium mb-2 md:mb-0 md:mr-2">Start Date:</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+          </label>
+          <label className="flex flex-col md:flex-row items-start md:items-center w-full">
+            <span className="text-gray-400 font-medium mb-2 md:mb-0 md:mr-2">End Date:</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+          </label>
+          <button
+            onClick={handleFilterByDate}
+            className="w-full md:w-auto px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            Filter
+          </button>
+        </div>
+      </div>
+
       <table className="min-w-full border-collapse border-2" >
         <thead>
           <tr>
@@ -382,9 +434,9 @@ const Dashboard = () => {
         <tbody>
           {filteredStudents.map(student => (
             <tr key={student.id}>
-              <td className="border-2 border-slate-400 px-4 py-2 cursor-pointer" onClick={()=>router.push(`/student/${student.id}`)}>{student.studentName}</td>
+              <td className="border-2 border-slate-400 px-4 py-2 cursor-pointer" onClick={() => router.push(`/student/${student.id}`)}>{student.studentName}</td>
               <td className="border-2 border-slate-400 px-4 py-2">{student.courseEndDate}</td>
-              <td className="border-2 border-slate-400 px-4 py-2">{student.loanGiven}</td>  
+              <td className="border-2 border-slate-400 px-4 py-2">{student.loanGiven}</td>
               <td className="border-2 border-slate-400 px-4 py-2 ">
                 <button
                   onClick={() => handleTogglePDC(student.id)}
@@ -397,17 +449,17 @@ const Dashboard = () => {
                     {student.pdcChecks.map(check => (
                       <div key={check.pdcChqNo} className="mb-2 flex space-x-4">
                         <div>
-                        <span className="block">Amount: {check.pdcAmount}</span>
+                          <span className="block">Amount: {check.pdcAmount}</span>
                         </div>
                         <div>
-                        <span className="block">Cheque Date: {check.pdcChqDate}</span>
+                          <span className="block">Cheque Date: {check.pdcChqDate}</span>
                         </div>
                         <button
                           onClick={() => handleCollected(student.id, check.pdcChqNo)}
                           className={`mr-2 px-2 py-1 ${check.collected ? "bg-green-400" : "bg-red-400"} text-white rounded`}
                           disabled={check.collected}
                         >
-                          {check?.collected==true ? "Collected" : "Collect"}
+                          {check?.collected == true ? "Collected" : "Collect"}
                         </button>
                         {check?.collected && (
                           <button

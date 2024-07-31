@@ -9,74 +9,26 @@ import { useRouter } from 'next/navigation';
 import useStudentsData from '@/functions/useStudentsData';
 import axios from 'axios';
 
-const Dashboard = () => {
-  const {students} = useStudentsData();
+const Filter = () => {
+  let {students,setStudents} = useStudentsData();
+  const [oldStudents, setOldStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
   const [showPDC, setShowPDC] = useState({});
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [pdcAmount, setPdcAmount] = useState(0);
 
   const router = useRouter();
 
   useEffect(() => {
     // Load dummy data
     setFilteredStudents(students);
-  }, [students]);
+  }, []);
 
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearch(value);
-    const currStudents = handleFilterChange({ target: { value: filter } });
-
-    if (value !== "") {
-      const filtered = currStudents.filter(student =>
-        student.studentName.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredStudents(filtered);
-    }
-  };
-
-  const handleFilterChange = (e) => {
-    const value = e.target.value;
-    setFilter(value);
-
-    let filtered = students;
-
-    if (value === "dueSoon") {
-      const today = new Date();
-      const sevenDaysLater = new Date();
-      sevenDaysLater.setDate(today.getDate() + 7);
-      filtered = students.filter(student => {
-        return student.pdcChecks.some(check => {
-          // Parse the check date string "dd/mm/yy" into day, month, and year
-          const [day, month, year] = check.pdcChqDate.split('/');
-          const checkDate = new Date(`${month}/${day}/${year}`);
-          return checkDate >= today && checkDate <= sevenDaysLater;
-        });
-      });
-    } else if (value === "currentMonth") {
-      const today = new Date();
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      filtered = students.filter(student => {
-        return student.pdcChecks.some(check => {
-          // Parse the check date string "dd/mm/yy" into day, month, and year
-          const [day, month, year] = check.pdcChqDate.split('/');
-          const checkDate = new Date(`${month}/${day}/${year}`);
-          return checkDate >= startOfMonth && checkDate <= endOfMonth;
-        });
-      });
-
-    }
-    setFilteredStudents(filtered);
-    setStartDate('');
-    setEndDate('');
-    return filtered;
-    // Add more filters if needed
-  };
-
+  useEffect(()=>{
+    if(filteredStudents?.length==0)setFilteredStudents(students)
+    setOldStudents(students);
+  },[students])
 
   const handleCollected = async (studentId, chqNo) => {
     try {
@@ -93,7 +45,7 @@ const Dashboard = () => {
       await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
 
       // Update the local state
-      const updatedStudents = filteredStudents.map(student => {
+      const updatedFilteredStudents = filteredStudents.map(student => {
         if (student.id === studentId) {
           return {
             ...student,
@@ -105,7 +57,21 @@ const Dashboard = () => {
         return student;
       });
 
-      setFilteredStudents(updatedStudents);
+      const updatedStudents = students.map(student => {
+        if (student.id === studentId) {
+          return {
+            ...student,
+            pdcChecks: student.pdcChecks.map(check =>
+              check.pdcChqNo === chqNo ? { ...check, collected: true } : check
+            )
+          };
+        }
+        return student;
+      }); 
+
+      setFilteredStudents(updatedFilteredStudents);
+      setStudents(updatedStudents)
+      calculateTotalPDCForMonth(updatedStudents)
       toast.success('PDC Cheque collected');
     } catch (error) {
       toast.error('Error updating PDC Cheque state');
@@ -127,7 +93,7 @@ const Dashboard = () => {
       await axios.post('http://localhost:8000/api/pdc/update_state/', { pdc_id: pdcCheck?.pdcId });
 
       // Update the local state
-      const updatedStudents = filteredStudents.map(student => {
+      const updatedFilteredStudents = filteredStudents.map(student => {
         if (student.id === studentId) {
           return {
             ...student,
@@ -139,46 +105,25 @@ const Dashboard = () => {
         return student;
       });
 
-      setFilteredStudents(updatedStudents);
+      const updatedStudents = students.map(student => {
+        if (student.id === studentId) {
+          return {
+            ...student,
+            pdcChecks: student.pdcChecks.map(check =>
+              check.pdcChqNo === chqNo ? { ...check, collected: false } : check
+            )
+          };
+        }
+        return student;
+      });
+
+      setFilteredStudents(updatedFilteredStudents);
+      setStudents(updatedStudents)
+      calculateTotalPDCForMonth(updatedStudents)
       toast.info('PDC Cheque collection undone');
     } catch (error) {
       toast.error('Error undoing PDC Cheque collection');
     }
-  };
-
-  const handleSendReminders = async () => {
-    const today = new Date();
-    const sevenDaysLater = new Date();
-    sevenDaysLater.setDate(today.getDate() + 7);
-    const dueSoonStudents = students.filter(student => {
-      return student.pdcChecks.some(check => {
-        const [day, month, year] = check.pdcChqDate.split('/');
-        const checkDate = new Date(`${month}/${day}/${year}`);
-        return checkDate >= today && checkDate <= sevenDaysLater;
-      });
-    });
-    const studentNames = dueSoonStudents.map(student => student.studentName).join(', ');
-    try {
-      // Make API call to send reminders
-      if (dueSoonStudents.length > 0) {
-        const response = await axios.post('http://localhost:8000/api/send_pdc_reminders/');
-
-        if (response.data.status === 'success') {
-          console.log(`Sending reminders to: ${studentNames}`);
-          toast.info(`Reminders sent to: ${studentNames}`);
-        } else {
-          toast.error(`Error: ${response.data.message}`);
-        }
-      }
-
-      else {
-        toast.info("No students PDC in next 7 days");
-      }
-
-    } catch (error) {
-      toast.error('Error sending reminders');
-    }
-
   };
 
   const handleTogglePDC = (id) => {
@@ -308,13 +253,12 @@ const Dashboard = () => {
     XLSX.writeFile(wb, "StudentData.xlsx");
   };
 
-  const calculateTotalPDCForMonth = () => {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const calculateTotalPDCForMonth = (studs) => {
+    const startOfMonth = new Date(startDate);
+    const endOfMonth = new Date(endDate);
     let total = 0;
 
-    students.forEach(student => {
+    studs.forEach(student => {
       student.pdcChecks.forEach(check => {
         const [day, month, year] = check.pdcChqDate.split('/');
         const checkDate = new Date(`${month}/${day}/${year}`);
@@ -324,89 +268,59 @@ const Dashboard = () => {
       });
     });
 
-    return total;
+    setPdcAmount(total);
   };
 
   const filterStudentsByDate = (students, startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    return students.filter(student => {
-      return student.pdcChecks.some(check => {
-        const [day, month, year] = check.pdcChqDate.split('/');
-        const checkDate = new Date(`${month}/${day}/${year}`);
-        return checkDate >= start && checkDate <= end;
-      });
-    });
+    if(startDate!='' && endDate!=''){
+        return students.filter(student => {
+            return student.pdcChecks.some(check => {
+              const [day, month, year] = check.pdcChqDate.split('/');
+              const checkDate = new Date(`${month}/${day}/${year}`);
+              return checkDate >= start && checkDate <= end;
+            });
+          });
+    }
+
+    else return students;
+    
   };
 
   const handleFilterByDate = () => {
     const filtered = filterStudentsByDate(students, startDate, endDate);
     setFilteredStudents(filtered);
-    setFilter("all")
   };
+
+  useEffect(()=>{
+    if(startDate!='' && endDate!=''){
+        handleFilterByDate();
+        calculateTotalPDCForMonth(students);
+    }
+    else if(startDate=='' && endDate==''){
+        setFilteredStudents(oldStudents);
+        calculateTotalPDCForMonth(students);
+    }
+  },[startDate,endDate])
 
   return (
     <div className="container mx-auto p-4">
       <ToastContainer />
-      <h1 className="text-2xl font-bold mb-4">Student Dashboard</h1>
-      <div className="mb-4 flex justify-between items-center">
-        <div>
-          <label className="mr-2">Filter:</label>
-          <select value={filter} onChange={handleFilterChange} className="border p-2 rounded">
-            <option value="all">All Students</option>
-            <option value="dueSoon">PDC Due Soon</option>
-            <option value="currentMonth">Current Month PDC</option>
-            {/* Add more filters as needed */}
-          </select>
-          <input
-            type="text"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search students..."
-            className="mb-4 ml-8 p-1.5 border rounded"
-          />
-        </div>
-        {filter === "dueSoon" && (
-          <button
-            onClick={handleSendReminders}
-            className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
-          >
-            Send Reminders
-          </button>
-        )}
-        <button
-          onClick={() => router.push("/form")}
-          className="mb-4 px-4 py-2 bg-green-800 text-white rounded"
-        >
-          Add Student
-        </button>
-        <button
-          onClick={() => router.push("/filter")}
-          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Filter By Date
-        </button>
-        <button
-          onClick={() => handleExport(filteredStudents)}
-          className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
-        >
-          Export to Excel
-        </button>
-        <button
-          onClick={() => router.push("/report")}
-          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Report Page
-        </button>
-
-      </div>
+      <button
+        onClick={() => router.push('/')}
+        className="mb-4 -ml-3   py-2 px-4 rounded   focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+      > 
+        &larr; Back to Dashboard
+      </button>
+      <h1 className="text-2xl font-bold mb-4">Student Filter</h1>
       <div className="mb-4">
-        <span className="font-bold">Total PDC Amount for this Month: </span>
-        {calculateTotalPDCForMonth()}
+        <span className="font-bold">Total PDC Amount between the selected dates: </span>
+        {pdcAmount}
       </div>
       <div className="flex flex-col md:flex-row items-center justify-between p-4  rounded-lg shadow-lg">
-        {/* <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
           <label className="flex flex-col md:flex-row items-start md:items-center w-full">
             <span className="text-gray-400 font-medium mb-2 md:mb-0 md:mr-2">Start Date:</span>
             <input
@@ -426,12 +340,21 @@ const Dashboard = () => {
             />
           </label>
           <button
+            onClick={()=>{
+                setStartDate('');
+                setEndDate('');
+            }}
+            className="w-full md:w-auto px-4 py-2 bg-red-600 text-white font-semibold rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            Remove Filter
+          </button>
+          {/* <button
             onClick={handleFilterByDate}
             className="w-full md:w-auto px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             Filter
-          </button>
-        </div> */}
+          </button> */}
+        </div>
       </div>
 
       <table className="min-w-full border-collapse border-2" >
@@ -458,7 +381,14 @@ const Dashboard = () => {
                 </button>
                 {showPDC[student.id] && (
                   <div className="mt-2 ">
-                    {student.pdcChecks.map(check => (
+                    {student.pdcChecks.map(check => {
+                        const [day, month, year] = check.pdcChqDate.split('/');
+                        const checkDate = new Date(`${month}/${day}/${year}`);
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        if ((startDate=='' || endDate=='') || (startDate!='' && endDate!='' && checkDate >= start && checkDate <= end)) {
+                        
+                        return(
                       <div key={check.pdcChqNo} className="mb-2 flex space-x-4">
                         <div>
                           <span className="block">Amount: {check.pdcAmount}</span>
@@ -482,7 +412,10 @@ const Dashboard = () => {
                           </button>
                         )}
                       </div>
-                    ))}
+                    )
+                    }
+                })
+                }
                   </div>
                 )}
               </td>
@@ -495,4 +428,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Filter;

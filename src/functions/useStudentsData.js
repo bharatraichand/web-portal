@@ -46,7 +46,7 @@ const useStudentsData = () => {
     fetchStudents();
   }, []);
 
-  return students;
+  return {students,setStudents};
 };
 
 export default useStudentsData;

@@ -10,7 +10,7 @@ import axios from 'axios';
 
 
 const StudentProfile = ({studentId}) => {
-  let students = useStudentsData();
+  let {students} = useStudentsData();
   const [student, setStudent] = useState(null);
   const router = useRouter();
 
@@ -266,7 +266,7 @@ const StudentProfile = ({studentId}) => {
           Export to Excel
         </button>
         <button
-          onClick={router.push(`/update/${student.id}`)}
+          onClick={()=>router.push(`/update/${student.id}`)}
           className="bg-green-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mr-2"
         >
           Update Profile

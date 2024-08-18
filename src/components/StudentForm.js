@@ -23,7 +23,9 @@ const StudentForm = () => {
       pdcAmount: '',
       pdcChqNo: '',
       pdcBankName: '',
-      pdcChqDate: ''
+      pdcChqDate: '',
+      pdcRemark:'',
+      pdcGivenName:''
     }],
     blankChqAmount: '',
     blankChqDate: '',
@@ -31,7 +33,11 @@ const StudentForm = () => {
     blankChqNo: '',
     mobileStud: '',
     mobileFat: '',
-    mobileMot: ''
+    mobileMot: '',
+    fatName:'',
+    motName:'',
+    fatEmail:'',
+    motEmail:''
   });
   const router = useRouter();
 
@@ -54,7 +60,9 @@ const StudentForm = () => {
       pdcAmount: '',
       pdcChqNo: '',
       pdcBankName: '',
-      pdcChqDate: ''
+      pdcChqDate: '',
+      pdcRemark:'',
+      pdcGivenName:''
     }));
     setFormData({ ...formData, numPDC, pdcChecks });
   };
@@ -74,9 +82,9 @@ const StudentForm = () => {
   };
 
   const validateForm = () => {
-    const { loanGiven, pdcChecks, mobileStud, mobileFat, mobileMot, email, initialChqNo, blankChqNo } = formData;
+    const { loanGiven, pdcChecks, mobileStud, mobileFat, mobileMot, email, initialChqNo, blankChqNo, fatEmail, motEmail } = formData;
 
-    if (!validateEmail(email)) {
+    if (!validateEmail(email) || !validateEmail(motEmail) || !validateEmail(fatEmail)) {
       toast.error('Invalid email address.');
       return false;
     }
@@ -113,7 +121,7 @@ const StudentForm = () => {
         studentName, email, currentStudy, courseDuration, courseEndDate,
         initialChqDate, initialBankName, initialChqNo, loanGiven,
         blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
-        mobileStud, mobileFat, mobileMot, pdcChecks
+        mobileStud, mobileFat, mobileMot, pdcChecks, motEmail, fatEmail, motName, fatName
       } = formData;
   
       // Format data for the backend
@@ -134,13 +142,20 @@ const StudentForm = () => {
           initial_chq_date: initialChqDate,
           initial_bank_name: initialBankName,
           initial_chq_no: initialChqNo,
-          loanamt: loanGiven
+          loanamt: loanGiven,
+          father_name: fatName,
+          father_email: fatEmail,
+          mother_email: motEmail,
+          mother_name: motName
+          
         },
         pdc: pdcChecks.map(check => ({
-          pdc_amount: check.pdcAmount,
-          pdc_chq_no: check.pdcChqNo,
-          pdc_bank_name: check.pdcBankName,
-          pdc_chq_date: check.pdcChqDate
+          pdc_amount: check?.pdcAmount,
+          pdc_chq_no: check?.pdcChqNo,
+          pdc_bank_name: check?.pdcBankName,
+          pdc_chq_date: check?.pdcChqDate,
+          pdc_remark:check?.pdcRemark,
+          pdc_given_name:check?.pdcGivenName,
         }))
       };
       
@@ -164,7 +179,7 @@ const StudentForm = () => {
       studentName, email, currentStudy, courseDuration, courseEndDate,
       initialChqDate, initialBankName, initialChqNo, loanGiven,
       blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
-      mobileStud, mobileFat, mobileMot, pdcChecks
+      mobileStud, mobileFat, mobileMot, pdcChecks, motEmail, fatEmail, motName, fatName
     } = formData;
   
     // Create the main row with basic student information
@@ -179,12 +194,16 @@ const StudentForm = () => {
       "Initial Bank Name": initialBankName,
       "Initial Cheque Number": initialChqNo,
       "Loan Given": loanGiven,
-      "Blank Cheque Amount": blankChqAmount,
+      "Sec. Dep. Chq @": blankChqAmount,
       "Blank Cheque Date": blankChqDate,
       "Blank Cheque Bank Name": blankChqBankName,
       "Blank Cheque Number": blankChqNo,
       "Student Mobile": mobileStud,
+      "Father's Name":fatName,
+      "Father's Email":fatEmail,
       "Father's Mobile": mobileFat,
+      "Mother's Name":motName,
+      "Mother's Email":motEmail,
       "Mother's Mobile": mobileMot,
     };
   
@@ -192,17 +211,20 @@ const StudentForm = () => {
     const header = [
       "Sr.", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
       "Initial Cheque Date", "Initial Bank Name", "Initial Cheque Number", "Loan Given",
-      "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date",
-      "Blank Cheque Amount", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
-      "Student Mobile", "Father's Mobile", "Mother's Mobile"
+      "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date", "PDC Remarks","PDC Chq Given Name",
+      "Sec. Dep. Chq @", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
+      "Student Mobile","Father's Name",  "Father's Mobile",  "Father's Email",
+      "Mother's Name","Mother's Mobile","Mother's Email",
     ];
   
     // Create an array for the PDC data, to be added to the main row
     const pdcData = pdcChecks.map((check, index) => ({
-      "PDC Cheque Amount": check.pdcAmount,
-      "PDC Cheque Number": check.pdcChqNo,
-      "PDC Bank Name": check.pdcBankName,
-      "PDC Cheque Date": check.pdcChqDate
+      "PDC Cheque Amount": check?.pdcAmount,
+      "PDC Cheque Number": check?.pdcChqNo,
+      "PDC Bank Name": check?.pdcBankName,
+      "PDC Cheque Date": check?.pdcChqDate,
+      "PDC Remarks": check?.pdcRemark,
+      "PDC Chq Given Name": check?.pdcGivenName,
     }));
   
     // Create an array to hold the rows
@@ -222,13 +244,17 @@ const StudentForm = () => {
         "Initial Cheque Number": '',
         "Loan Given": '',
         ...pdc,
-        "Blank Cheque Amount": '',
+        "Sec. Dep. Chq @": '',
         "Blank Cheque Date": '',
         "Blank Cheque Bank Name": '',
         "Blank Cheque Number": '',
         "Student Mobile": '',
+        "Father's Name":'',
         "Father's Mobile": '',
-        "Mother's Mobile": ''
+        "Father's Email":'',
+        "Mother's Name":'',
+        "Mother's Mobile": '',
+        "Mother's Email":'',
       });
     });
   
@@ -282,7 +308,6 @@ const StudentForm = () => {
           value={formData.studentName}
           onChange={handleInputChange}
           className="input input-bordered w-full"
-          required
         />
       </div>
       <div className="mb-4">
@@ -293,7 +318,6 @@ const StudentForm = () => {
           value={formData.email}
           onChange={handleInputChange}
           className="input input-bordered w-full"
-          required
         />
       </div>
       <div className="mb-4">
@@ -303,7 +327,6 @@ const StudentForm = () => {
           value={formData.currentStudy}
           onChange={handleInputChange}
           className="input input-bordered w-full"
-          required
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -314,7 +337,6 @@ const StudentForm = () => {
           value={formData.courseDuration}
           onChange={handleInputChange}
           className="input input-bordered w-full"
-          required
         />
       </div>
       <div className="mb-4">
@@ -325,7 +347,6 @@ const StudentForm = () => {
           value={formData.courseEndDate}
           onChange={handleInputChange}
           className="input input-bordered w-full"
-          required
         />
       </div>
       </div>
@@ -339,7 +360,6 @@ const StudentForm = () => {
           value={formData.initialChqDate}
           onChange={handleInputChange}
           className="input input-bordered w-full"
-          required
         />
       </div>
         <div>
@@ -349,7 +369,6 @@ const StudentForm = () => {
             value={formData.initialBankName}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
           />
         </div>
         <div>
@@ -359,7 +378,6 @@ const StudentForm = () => {
             value={formData.initialChqNo}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
           />
         </div>
       </div>
@@ -371,7 +389,6 @@ const StudentForm = () => {
           value={formData.loanGiven}
           onChange={handleInputChange}
           className="input input-bordered w-full"
-          required
         />
       </div>
       <div className="mb-4">
@@ -383,11 +400,11 @@ const StudentForm = () => {
           onChange={handleNumPDCChange}
           className="input input-bordered w-full"
           min="0"
-          required
         />
       </div>
       {formData.pdcChecks.map((check, index) => (
-        <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div key={index}>
+        <div  className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div>
             <label className="block text-sm font-bold mb-2">PDC Cheque Amount</label>
             <input
@@ -396,7 +413,6 @@ const StudentForm = () => {
               value={check.pdcAmount}
               onChange={(e) => handlePDCInputChange(index, e)}
               className="input input-bordered w-full"
-              required
             />
           </div>
           <div>
@@ -406,7 +422,6 @@ const StudentForm = () => {
               value={check.pdcChqNo}
               onChange={(e) => handlePDCInputChange(index, e)}
               className="input input-bordered w-full"
-              required
             />
           </div>
           <div>
@@ -416,7 +431,6 @@ const StudentForm = () => {
               value={check.pdcBankName}
               onChange={(e) => handlePDCInputChange(index, e)}
               className="input input-bordered w-full"
-              required
             />
           </div>
           <div>
@@ -427,21 +441,40 @@ const StudentForm = () => {
               value={check.pdcChqDate}
               onChange={(e) => handlePDCInputChange(index, e)}
               className="input input-bordered w-full"
-              required
             />
           </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label className="block text-sm font-bold mb-2">PDC Remarks</label>
+            <input
+              name="pdcRemark"
+              value={check.pdcRemark}
+              onChange={(e) => handlePDCInputChange(index, e)}
+              className="input input-bordered w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold mb-2">PDC Cheque Given Name</label>
+            <input
+              name="pdcGivenName"
+              value={check.pdcGivenName}
+              onChange={(e) => handlePDCInputChange(index, e)}
+              className="input input-bordered w-full"
+            />
+          </div>
+        </div>
         </div>
       ))}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Amount</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq @</label>
           <input
             name="blankChqAmount"
             type="number"
             value={formData.blankChqAmount}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
           />
         </div>
         <div>
@@ -463,7 +496,6 @@ const StudentForm = () => {
             value={formData.blankChqBankName}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
           />
         </div>
         <div>
@@ -473,7 +505,6 @@ const StudentForm = () => {
             value={formData.blankChqNo}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
           />
         </div>
       </div>
@@ -485,7 +516,6 @@ const StudentForm = () => {
             value={formData.mobileStud}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
           />
         </div>
         <div>
@@ -495,7 +525,6 @@ const StudentForm = () => {
             value={formData.mobileFat}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
           />
         </div>
         <div>
@@ -505,7 +534,46 @@ const StudentForm = () => {
             value={formData.mobileMot}
             onChange={handleInputChange}
             className="input input-bordered w-full"
-            required
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+          <label className="block text-sm font-bold mb-2">Father&apos;s Name</label>
+          <input
+            name="fatName"
+            value={formData.fatName}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-bold mb-2">Father&apos;s Email</label>
+          <input
+            name="fatEmail"
+            value={formData.fatEmail}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+          <label className="block text-sm font-bold mb-2">Mother&apos;s Name</label>
+          <input
+            name="motName"
+            value={formData.motName}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-bold mb-2">Mother&apos;s Email</label>
+          <input
+            name="motEmail"
+            value={formData.motEmail}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
           />
         </div>
       </div>

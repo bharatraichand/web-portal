@@ -24,7 +24,11 @@ const UpdateProfile = ({studentId}) => {
     blankChqNo: '',
     mobileStud: '',
     mobileFat: '',
-    mobileMot: ''
+    mobileMot: '',
+    motEmail:'',
+    motName:'',
+    fatEmail:'',
+    fatName:''
   });
   const router = useRouter();
 
@@ -34,23 +38,26 @@ const UpdateProfile = ({studentId}) => {
   };
 
   const validateMobile = (mobile) => {
+    if(!mobile || mobile.length==0)return true;
     const mobilePattern = /^[0-9]{10}$/;
     return mobilePattern.test(mobile);
   };
 
   const validateEmail = (email) => {
+    if(!email || email.length==0)return true;
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
 
   const validateChequeNumber = (chqNo) => {
+    if(!chqNo || chqNo.length==0)return true;
     return chqNo.length >= 6;
   };
 
   const validateForm = () => {
-    const { mobileStud, mobileFat, mobileMot, email, initialChqNo, blankChqNo } = formData;
+    const { mobileStud, mobileFat, mobileMot, email, initialChqNo, blankChqNo, motEmail, fatEmail} = formData;
 
-    if (!validateEmail(email)) {
+    if (!validateEmail(email)|| !validateEmail(motEmail) || !validateEmail(fatEmail)) {
       toast.error('Invalid email address.');
       return false;
     }
@@ -86,22 +93,26 @@ const UpdateProfile = ({studentId}) => {
       const data = await response.json();
   
       const formattedData = {
-        studentName: data.general.name,
-        email: data.general.email,
-        currentStudy: data.general.current_study,
-        courseDuration: data.general.course_duration,
-        courseEndDate: data.general.course_end_date,
-        initialChqDate: data.general.initial_chq_date,
-        initialBankName: data.general.initial_bank_name,
-        initialChqNo: data.general.initial_chq_no,
-        loanGiven: data.general.loanamt,
-        blankChqAmount: data.general.blank_chq_amount,
-        blankChqDate: data.general.blank_chq_date,
-        blankChqBankName: data.general.blank_chq_bank_name,
-        blankChqNo: data.general.blank_chq_no,
-        mobileStud: data.general.mobile_stu,
-        mobileFat: data.general.mobile_fat,
-        mobileMot: data.general.mobile_mot
+        studentName: data?.general?.name,
+        email: data?.general?.email,
+        currentStudy: data?.general?.current_study,
+        courseDuration: data?.general?.course_duration,
+        courseEndDate: data?.general?.course_end_date,
+        initialChqDate: data?.general?.initial_chq_date,
+        initialBankName: data?.general?.initial_bank_name,
+        initialChqNo: data?.general?.initial_chq_no,
+        loanGiven: data?.general?.loanamt,
+        blankChqAmount: data?.general?.blank_chq_amount,
+        blankChqDate: data?.general?.blank_chq_date,
+        blankChqBankName: data?.general?.blank_chq_bank_name,
+        blankChqNo: data?.general?.blank_chq_no,
+        mobileStud: data?.general?.mobile_stu,
+        mobileFat: data?.general?.mobile_fat,
+        mobileMot: data?.general?.mobile_mot,
+        motEmail: data?.general?.mother_email,
+        motName: data?.general?.mother_name,
+        fatEmail: data?.general?.father_email,
+        fatName: data?.general?.father_name,
       };
   
       setFormData(formattedData)
@@ -122,7 +133,7 @@ const UpdateProfile = ({studentId}) => {
         studentName, email, currentStudy, courseDuration, courseEndDate,
         initialChqDate, initialBankName, initialChqNo, loanGiven,
         blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
-        mobileStud, mobileFat, mobileMot
+        mobileStud, mobileFat, mobileMot, motEmail, fatEmail, motName, fatName
       } = formData;
   
       // Format data for the backend
@@ -143,7 +154,11 @@ const UpdateProfile = ({studentId}) => {
           initial_chq_date: initialChqDate,
           initial_bank_name: initialBankName,
           initial_chq_no: initialChqNo,
-          loanamt: loanGiven
+          loanamt: loanGiven,
+          father_name: fatName,
+          father_email: fatEmail,
+          mother_email: motEmail,
+          mother_name: motName
       };
       
   
@@ -275,7 +290,7 @@ const UpdateProfile = ({studentId}) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Amount</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq @</label>
           <input
             name="blankChqAmount"
             type="number"
@@ -347,6 +362,46 @@ const UpdateProfile = ({studentId}) => {
             onChange={handleInputChange}
             className="input input-bordered w-full"
             required
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+          <label className="block text-sm font-bold mb-2">Father&apos;s Name</label>
+          <input
+            name="fatName"
+            value={formData.fatName}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-bold mb-2">Father&apos;s Email</label>
+          <input
+            name="fatEmail"
+            value={formData.fatEmail}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+          <label className="block text-sm font-bold mb-2">Mother&apos;s Name</label>
+          <input
+            name="motName"
+            value={formData.motName}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-bold mb-2">Mother&apos;s Email</label>
+          <input
+            name="motEmail"
+            value={formData.motEmail}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
           />
         </div>
       </div>

@@ -140,9 +140,10 @@ const Filter = () => {
     const header = [
       "Sr.", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
       "Initial Cheque Date", "Initial Bank Name", "Initial Cheque Number", "Loan Given",
-      "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date",
-      "Blank Cheque Amount", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
-      "Student Mobile", "Father's Mobile", "Mother's Mobile"
+      "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date","PDC Remarks","PDC Chq Given Name",
+      "Sec. Dep. Chq @", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
+      "Student Mobile", "Father's Name",  "Father's Mobile",  "Father's Email",
+      "Mother's Name","Mother's Mobile","Mother's Email",
     ];
 
     students.forEach((student, index) => {
@@ -150,7 +151,7 @@ const Filter = () => {
         studentName, email, currentStudy, courseDuration, courseEndDate,
         initialChqDate, initialBankName, initialChqNo, loanGiven,
         blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
-        mobileStud, mobileFat, mobileMot, pdcChecks
+        mobileStud, mobileFat, mobileMot, pdcChecks, motEmail, fatEmail, motName, fatName
       } = student;
 
       // Create the main row with basic student information
@@ -165,13 +166,17 @@ const Filter = () => {
         "Initial Bank Name": initialBankName,
         "Initial Cheque Number": initialChqNo,
         "Loan Given": loanGiven,
-        "Blank Cheque Amount": blankChqAmount,
+        "Sec. Dep. Chq @": blankChqAmount,
         "Blank Cheque Date": blankChqDate,
         "Blank Cheque Bank Name": blankChqBankName,
         "Blank Cheque Number": blankChqNo,
         "Student Mobile": mobileStud,
+        "Father's Name":fatName,
+        "Father's Email":fatEmail,
         "Father's Mobile": mobileFat,
-        "Mother's Mobile": mobileMot
+        "Mother's Name":motName,
+        "Mother's Email":motEmail,
+        "Mother's Mobile": mobileMot,
       };
 
       // Add main row to the rows array
@@ -182,7 +187,9 @@ const Filter = () => {
         "PDC Cheque Amount": check.pdcAmount,
         "PDC Cheque Number": check.pdcChqNo,
         "PDC Bank Name": check.pdcBankName,
-        "PDC Cheque Date": check.pdcChqDate
+        "PDC Cheque Date": check.pdcChqDate,
+        "PDC Remarks": check?.pdcRemark,
+        "PDC Chq Given Name": check?.pdcGivenName,
       }));
 
       // Add PDC data as separate rows with empty values for non-PDC fields
@@ -199,13 +206,17 @@ const Filter = () => {
           "Initial Cheque Number": '',
           "Loan Given": '',
           ...pdc,
-          "Blank Cheque Amount": '',
+          "Sec. Dep. Chq @": '',
           "Blank Cheque Date": '',
           "Blank Cheque Bank Name": '',
           "Blank Cheque Number": '',
           "Student Mobile": '',
+          "Father's Name":'',
           "Father's Mobile": '',
-          "Mother's Mobile": ''
+          "Father's Email":'',
+          "Mother's Name":'',
+          "Mother's Mobile": '',
+          "Mother's Email":'',
         });
       });
     });
@@ -322,7 +333,7 @@ const Filter = () => {
       <div className="flex flex-col md:flex-row items-center justify-between p-4  rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
           <label className="flex flex-col md:flex-row items-start md:items-center w-full">
-            <span className="text-gray-400 font-medium mb-2 md:mb-0 md:mr-2">Start Date:</span>
+            <span className="text-gray-400 font-medium mb-2 md:mb-0 md:mr-2">From Date:</span>
             <input
               type="date"
               value={startDate}
@@ -331,7 +342,7 @@ const Filter = () => {
             />
           </label>
           <label className="flex flex-col md:flex-row items-start md:items-center w-full">
-            <span className="text-gray-400 font-medium mb-2 md:mb-0 md:mr-2">End Date:</span>
+            <span className="text-gray-400 font-medium mb-2 md:mb-0 md:mr-2">To Date:</span>
             <input
               type="date"
               value={endDate}

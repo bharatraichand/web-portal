@@ -27,7 +27,7 @@ const StudentProfile = ({studentId}) => {
       studentName, email, currentStudy, courseDuration, courseEndDate,
       initialChqDate, initialBankName, initialChqNo, loanGiven,
       blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
-      mobileStud, mobileFat, mobileMot, pdcChecks
+      mobileStud, mobileFat, mobileMot, pdcChecks,motEmail, fatEmail, motName, fatName
     } = student;
 
     const mainData = {
@@ -41,12 +41,16 @@ const StudentProfile = ({studentId}) => {
       "Initial Bank Name": initialBankName,
       "Initial Cheque Number": initialChqNo,
       "Loan Given": loanGiven,
-      "Blank Cheque Amount": blankChqAmount,
+      "Sec. Dep. Chq @": blankChqAmount,
       "Blank Cheque Date": blankChqDate,
       "Blank Cheque Bank Name": blankChqBankName,
       "Blank Cheque Number": blankChqNo,
       "Student Mobile": mobileStud,
+      "Father's Name":fatName,
+      "Father's Email":fatEmail,
       "Father's Mobile": mobileFat,
+      "Mother's Name":motName,
+      "Mother's Email":motEmail,
       "Mother's Mobile": mobileMot,
     };
 
@@ -54,15 +58,18 @@ const StudentProfile = ({studentId}) => {
       "Sr.", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
       "Initial Cheque Date", "Initial Bank Name", "Initial Cheque Number", "Loan Given",
       "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date",
-      "Blank Cheque Amount", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
-      "Student Mobile", "Father's Mobile", "Mother's Mobile"
+      "Sec. Dep. Chq @", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
+      "Student Mobile","Father's Name",  "Father's Mobile",  "Father's Email",
+      "Mother's Name","Mother's Mobile","Mother's Email",
     ];
 
     const pdcData = pdcChecks.map((check, index) => ({
       "PDC Cheque Amount": check.pdcAmount,
       "PDC Cheque Number": check.pdcChqNo,
       "PDC Bank Name": check.pdcBankName,
-      "PDC Cheque Date": check.pdcChqDate
+      "PDC Cheque Date": check.pdcChqDate,
+      "PDC Remarks": check?.pdcRemark,
+      "PDC Chq Given Name": check?.pdcGivenName,
     }));
 
     const rows = [mainData];
@@ -80,13 +87,17 @@ const StudentProfile = ({studentId}) => {
         "Initial Cheque Number": '',
         "Loan Given": '',
         ...pdc,
-        "Blank Cheque Amount": '',
+        "Sec. Dep. Chq @": '',
         "Blank Cheque Date": '',
         "Blank Cheque Bank Name": '',
         "Blank Cheque Number": '',
         "Student Mobile": '',
+        "Father's Name":'',
         "Father's Mobile": '',
-        "Mother's Mobile": ''
+        "Father's Email":'',
+        "Mother's Name":'',
+        "Mother's Mobile": '',
+        "Mother's Email":'',
       });
     });
 
@@ -176,7 +187,6 @@ const StudentProfile = ({studentId}) => {
       }
       setStudent(updatedStudent);
       toast.info('PDC Cheque collection undone');
-      toast.info('PDC Cheque collection undone');
     } catch (error) {
       toast.error('Error undoing PDC Cheque collection');
     }
@@ -193,48 +203,54 @@ const StudentProfile = ({studentId}) => {
       > 
         &larr; Back to Dashboard
       </button>
-      <h1 className="text-3xl font-bold mb-6 text-center">Student Profile: {student.studentName}</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Student Profile: {student?.studentName}</h1>
       <div className=" shadow-2xl rounded-lg p-6 mb-6">
         <div className="mb-4">
           <h2 className="text-xl font-semibold border-b border-slate-400 pb-2 mb-4">Personal Information</h2>
           <div className="grid grid-cols-2 gap-4">
-            <p><strong>Email:</strong> {student.email}</p>
-            <p><strong>Current Study:</strong> {student.currentStudy}</p>
-            <p><strong>Course Duration:</strong> {student.courseDuration}</p>
-            <p><strong>Course End Date:</strong> {student.courseEndDate}</p>
-            <p><strong>Loan Given:</strong> {student.loanGiven}</p>
-            <p><strong>Student Mobile:</strong> {student.mobileStud}</p>
-            <p><strong>Father&apos;s Mobile:</strong> {student.mobileFat}</p>
-            <p><strong>Mother&apos;s Mobile:</strong> {student.mobileMot}</p>
+            <p><strong>Email:</strong> {student?.email}</p>
+            <p><strong>Current Study:</strong> {student?.currentStudy}</p>
+            <p><strong>Course Duration:</strong> {student?.courseDuration}</p>
+            <p><strong>Course End Date:</strong> {student?.courseEndDate}</p>
+            <p><strong>Loan Given:</strong> {student?.loanGiven}</p>
+            <p><strong>Student Mobile:</strong> {student?.mobileStud}</p>
+            <p><strong>Father&apos;s Mobile:</strong> {student?.mobileFat}</p>
+            <p><strong>Mother&apos;s Mobile:</strong> {student?.mobileMot}</p>
+            <p><strong>Father&apos;s Name:</strong> {student?.fatName}</p>
+            <p><strong>Mother&apos;s Name:</strong> {student?.motName}</p>
+            <p><strong>Father&apos;s Email:</strong> {student?.fatEmail}</p>
+            <p><strong>Mother&apos;s Email:</strong> {student?.motEmail}</p>
           </div>
         </div>
         <div className="mb-4">
           <h2 className="text-xl font-semibold border-b border-slate-400 pb-2 mb-4">Initial Cheque Details</h2>
           <div className="grid grid-cols-2 gap-4">
-            <p><strong>Cheque Date:</strong> {student.initialChqDate}</p>
-            <p><strong>Bank Name:</strong> {student.initialBankName}</p>
-            <p><strong>Cheque Number:</strong> {student.initialChqNo}</p>
+            <p><strong>Cheque Date:</strong> {student?.initialChqDate}</p>
+            <p><strong>Bank Name:</strong> {student?.initialBankName}</p>
+            <p><strong>Cheque Number:</strong> {student?.initialChqNo}</p>
           </div>
         </div>
         <div className="mb-4">
           <h2 className="text-xl font-semibold border-b border-slate-400 pb-2 mb-4">Blank Cheque Details</h2>
           <div className="grid grid-cols-2 gap-4">
-            <p><strong>Cheque Amount:</strong> {student.blankChqAmount}</p>
-            <p><strong>Cheque Date:</strong> {student.blankChqDate}</p>
-            <p><strong>Bank Name:</strong> {student.blankChqBankName}</p>
-            <p><strong>Cheque Number:</strong> {student.blankChqNo}</p>
+            <p><strong>Cheque Amount:</strong> {student?.blankChqAmount}</p>
+            <p><strong>Cheque Date:</strong> {student?.blankChqDate}</p>
+            <p><strong>Bank Name:</strong> {student?.blankChqBankName}</p>
+            <p><strong>Cheque Number:</strong> {student?.blankChqNo}</p>
           </div>
         </div>
         <div className="mb-4">
           <h2 className="text-xl font-semibold border-b border-slate-400 pb-2 mb-4">PDC Cheques</h2>
-          {student.pdcChecks.length > 0 ? (
+          {student?.pdcChecks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {student.pdcChecks.map((check, index) => (
+              {student?.pdcChecks.map((check, index) => (
                 <div key={index} className="border border-slate-400 rounded-lg p-4 ">
-                  <p><strong>Cheque Amount:</strong> {check.pdcAmount}</p>
-                  <p><strong>Cheque Number:</strong> {check.pdcChqNo}</p>
-                  <p><strong>Bank Name:</strong> {check.pdcBankName}</p>
-                  <p><strong>Cheque Date:</strong> {check.pdcChqDate}</p>
+                  <p><strong>Cheque Amount:</strong> {check?.pdcAmount}</p>
+                  <p><strong>Cheque Number:</strong> {check?.pdcChqNo}</p>
+                  <p><strong>Bank Name:</strong> {check?.pdcBankName}</p>
+                  <p><strong>Cheque Date:</strong> {check?.pdcChqDate}</p>
+                  <p><strong>Cheque Remarks:</strong>{check?.pdcRemark}</p>
+                  <p><strong>Cheque Given Name:</strong>{check?.pdcGivenName}</p>
                   <button
                     onClick={() => handleCollected( check.pdcChqNo)}
                     className={`mr-2 mt-2 px-2 py-1 ${check.collected ? "bg-green-400" : "bg-red-400"} text-white rounded`}
@@ -266,7 +282,7 @@ const StudentProfile = ({studentId}) => {
           Export to Excel
         </button>
         <button
-          onClick={()=>router.push(`/update/${student.id}`)}
+          onClick={()=>router.push(`/update/${student?.id}`)}
           className="bg-green-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mr-2"
         >
           Update Profile

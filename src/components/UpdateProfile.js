@@ -290,7 +290,7 @@ const UpdateProfile = ({studentId}) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq @</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Amount</label>
           <input
             name="blankChqAmount"
             type="number"
@@ -301,7 +301,7 @@ const UpdateProfile = ({studentId}) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Date</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Date</label>
           <input
             type="date"
             name="blankChqDate"
@@ -313,7 +313,7 @@ const UpdateProfile = ({studentId}) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Bank Name</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Bank Name</label>
           <input
             name="blankChqBankName"
             value={formData.blankChqBankName}
@@ -323,7 +323,7 @@ const UpdateProfile = ({studentId}) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Number</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Number</label>
           <input
             name="blankChqNo"
             value={formData.blankChqNo}

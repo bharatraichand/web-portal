@@ -41,10 +41,10 @@ const StudentProfile = ({studentId}) => {
       "Initial Bank Name": initialBankName,
       "Initial Cheque Number": initialChqNo,
       "Loan Given": loanGiven,
-      "Sec. Dep. Chq @": blankChqAmount,
-      "Blank Cheque Date": blankChqDate,
-      "Blank Cheque Bank Name": blankChqBankName,
-      "Blank Cheque Number": blankChqNo,
+      "Sec. Dep. Chq Amount": blankChqAmount,
+      "Sec. Dep. Chq Date": blankChqDate,
+      "Sec. Dep. Chq Bank Name": blankChqBankName,
+      "Sec. Dep. Chq Number": blankChqNo,
       "Student Mobile": mobileStud,
       "Father's Name":fatName,
       "Father's Email":fatEmail,
@@ -58,7 +58,7 @@ const StudentProfile = ({studentId}) => {
       "Sr.", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
       "Initial Cheque Date", "Initial Bank Name", "Initial Cheque Number", "Loan Given",
       "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date",
-      "Sec. Dep. Chq @", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
+      "Sec. Dep. Chq Amount", "Sec. Dep. Chq Date", "Sec. Dep. Chq Bank Name", "Sec. Dep. Chq Number",
       "Student Mobile","Father's Name",  "Father's Mobile",  "Father's Email",
       "Mother's Name","Mother's Mobile","Mother's Email",
     ];
@@ -87,10 +87,10 @@ const StudentProfile = ({studentId}) => {
         "Initial Cheque Number": '',
         "Loan Given": '',
         ...pdc,
-        "Sec. Dep. Chq @": '',
-        "Blank Cheque Date": '',
-        "Blank Cheque Bank Name": '',
-        "Blank Cheque Number": '',
+        "Sec. Dep. Chq Amount": '',
+        "Sec. Dep. Chq Date": '',
+        "Sec. Dep. Chq Bank Name": '',
+        "Sec. Dep. Chq Number": '',
         "Student Mobile": '',
         "Father's Name":'',
         "Father's Mobile": '',
@@ -231,7 +231,7 @@ const StudentProfile = ({studentId}) => {
           </div>
         </div>
         <div className="mb-4">
-          <h2 className="text-xl font-semibold border-b border-slate-400 pb-2 mb-4">Blank Cheque Details</h2>
+          <h2 className="text-xl font-semibold border-b border-slate-400 pb-2 mb-4">Sec. Dep. Chq Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <p><strong>Cheque Amount:</strong> {student?.blankChqAmount}</p>
             <p><strong>Cheque Date:</strong> {student?.blankChqDate}</p>

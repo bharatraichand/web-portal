@@ -194,10 +194,10 @@ const StudentForm = () => {
       "Initial Bank Name": initialBankName,
       "Initial Cheque Number": initialChqNo,
       "Loan Given": loanGiven,
-      "Sec. Dep. Chq @": blankChqAmount,
-      "Blank Cheque Date": blankChqDate,
-      "Blank Cheque Bank Name": blankChqBankName,
-      "Blank Cheque Number": blankChqNo,
+      "Sec. Dep. Chq Amount": blankChqAmount,
+      "Sec. Dep. Chq Date": blankChqDate,
+      "Sec. Dep. Chq Bank Name": blankChqBankName,
+      "Sec. Dep. Chq Number": blankChqNo,
       "Student Mobile": mobileStud,
       "Father's Name":fatName,
       "Father's Email":fatEmail,
@@ -212,7 +212,7 @@ const StudentForm = () => {
       "Sr.", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
       "Initial Cheque Date", "Initial Bank Name", "Initial Cheque Number", "Loan Given",
       "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date", "PDC Remarks","PDC Chq Given Name",
-      "Sec. Dep. Chq @", "Blank Cheque Date", "Blank Cheque Bank Name", "Blank Cheque Number",
+      "Sec. Dep. Chq Amount", "Sec. Dep. Chq Date", "Sec. Dep. Chq Bank Name", "Sec. Dep. Chq Number",
       "Student Mobile","Father's Name",  "Father's Mobile",  "Father's Email",
       "Mother's Name","Mother's Mobile","Mother's Email",
     ];
@@ -244,10 +244,10 @@ const StudentForm = () => {
         "Initial Cheque Number": '',
         "Loan Given": '',
         ...pdc,
-        "Sec. Dep. Chq @": '',
-        "Blank Cheque Date": '',
-        "Blank Cheque Bank Name": '',
-        "Blank Cheque Number": '',
+        "Sec. Dep. Chq Amount": '',
+        "Sec. Dep. Chq Date": '',
+        "Sec. Dep. Chq Bank Name": '',
+        "Sec. Dep. Chq Number": '',
         "Student Mobile": '',
         "Father's Name":'',
         "Father's Mobile": '',
@@ -468,7 +468,7 @@ const StudentForm = () => {
       ))}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq @</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Amount</label>
           <input
             name="blankChqAmount"
             type="number"
@@ -478,7 +478,7 @@ const StudentForm = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Date</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Date</label>
           <input
             type="date"
             name="blankChqDate"
@@ -490,7 +490,7 @@ const StudentForm = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Bank Name</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Bank Name</label>
           <input
             name="blankChqBankName"
             value={formData.blankChqBankName}
@@ -499,7 +499,7 @@ const StudentForm = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2">Blank Cheque Number</label>
+          <label className="block text-sm font-bold mb-2">Sec. Dep. Chq Number</label>
           <input
             name="blankChqNo"
             value={formData.blankChqNo}

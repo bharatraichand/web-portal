@@ -241,7 +241,9 @@ const Dashboard = () => {
         "PDC Cheque Amount": check.pdcAmount,
         "PDC Cheque Number": check.pdcChqNo,
         "PDC Bank Name": check.pdcBankName,
-        "PDC Cheque Date": check.pdcChqDate
+        "PDC Cheque Date": check.pdcChqDate,
+        "PDC Remarks": check?.pdcRemark,
+        "PDC Chq Given Name": check?.pdcGivenName,
       }));
 
       // Add PDC data as separate rows with empty values for non-PDC fields

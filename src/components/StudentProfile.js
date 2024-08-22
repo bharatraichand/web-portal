@@ -129,11 +129,6 @@ const StudentProfile = ({studentId}) => {
     XLSX.writeFile(wb, "StudentData.xlsx");
   };
 
-  const handleSendReminder =  () => {
-    // Implement your reminder sending logic here
-    toast.success(`Reminder sent to ${student.studentName}`);
-  };
-
   const handleCollected = async ( chqNo) => {
 
     try {

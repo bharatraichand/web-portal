@@ -162,7 +162,7 @@ const StudentForm = () => {
   
       try {
         const response = await axios.post('http://localhost:8000/api/students/add/', formattedData);
-        if (response.status === 201) {
+        if (response.status === 201 || response.status === 200) {
           toast.success('Form submitted successfully!');
         } else {
           toast.error('Failed to submit the form. Please try again.');
@@ -262,7 +262,7 @@ const StudentForm = () => {
     const ws = XLSX.utils.json_to_sheet(rows, { header });
   
       // Function to calculate the maximum width of a column
-  const getMaxWidth = (arr, header) => {
+    const getMaxWidth = (arr, header) => {
     const maxLength = Math.max(...arr.map(val => (val ? val.toString().length : 0)));
     return Math.max(maxLength, header.length) * 6; // Multiply by 10 to get the width in pixels
   };

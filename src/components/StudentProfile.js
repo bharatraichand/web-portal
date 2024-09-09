@@ -7,11 +7,14 @@ import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import useStudentsData from '@/functions/useStudentsData';
 import axios from 'axios';
-
+import AddPDC from './AddPDC';
+import UpdatePDC from './UpdatePDC';
+import Swal from 'sweetalert2';
 
 const StudentProfile = ({studentId}) => {
   let {students} = useStudentsData();
   const [student, setStudent] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
   useEffect(()=>{
@@ -24,14 +27,14 @@ const StudentProfile = ({studentId}) => {
 
   const handleExport = () => {
     const {
-      studentName, email, currentStudy, courseDuration, courseEndDate,
+      id, studentName, email, currentStudy, courseDuration, courseEndDate,
       initialChqDate, initialBankName, initialChqNo, loanGiven,
       blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
       mobileStud, mobileFat, mobileMot, pdcChecks,motEmail, fatEmail, motName, fatName
     } = student;
 
     const mainData = {
-      "Sr.": 1,
+      "Sr.": id,
       "Student Name": studentName,
       "Email": email,
       "Current Study": currentStudy,
@@ -64,6 +67,7 @@ const StudentProfile = ({studentId}) => {
     ];
 
     const pdcData = pdcChecks.map((check, index) => ({
+      
       "PDC Cheque Amount": check.pdcAmount,
       "PDC Cheque Number": check.pdcChqNo,
       "PDC Bank Name": check.pdcBankName,
@@ -187,8 +191,36 @@ const StudentProfile = ({studentId}) => {
     }
 
   }
-
-
+  const handleDelete =  (pdc_id) => {
+    Swal.fire({ 
+        title: 'Are you sure, you want to delete?',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Delete'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const response= axios.post('http://localhost:8000/api/pdc/delete_pdc/', { pdc_id: pdc_id  });
+            window.location.reload();
+            Swal.fire(
+                'Deleted!',
+                'Your file has been deleted.',
+                'success'
+            );
+        }
+    });
+};
+  const handleEdit = (check) => {
+   setIsOpen(true);
+};
+const handleSetReminder = async () => {}
+const handleAddPdc = async () => {
+  setIsOpen(true);
+}
+const handleOnClose = () => {
+  setIsOpen(false);
+}
   return (
     <div className="container mx-auto p-4">
       <ToastContainer />
@@ -199,6 +231,10 @@ const StudentProfile = ({studentId}) => {
         &larr; Back to Dashboard
       </button>
       <h1 className="text-3xl font-bold mb-6 text-center">Student Profile: {student?.studentName}</h1>
+        <button className='px-4 py-2 bg-green-400 text-white rounded float-right'
+        onClick =  {handleAddPdc}
+        >Add PDC Cheque</button>
+        {isOpen && <AddPDC isOpen={isOpen} onClose={handleOnClose} general_id={parseInt(studentId)}/>}
       <div className=" shadow-2xl rounded-lg p-6 mb-6">
         <div className="mb-4">
           <h2 className="text-xl font-semibold border-b border-slate-400 pb-2 mb-4">Personal Information</h2>
@@ -213,8 +249,8 @@ const StudentProfile = ({studentId}) => {
             <p><strong>Mother&apos;s Mobile:</strong> {student?.mobileMot}</p>
             <p><strong>Father&apos;s Name:</strong> {student?.fatName}</p>
             <p><strong>Mother&apos;s Name:</strong> {student?.motName}</p>
-            <p><strong>Father&apos;s Email:</strong> {student?.fatEmail}</p>
-            <p><strong>Mother&apos;s Email:</strong> {student?.motEmail}</p>
+            <p><strong>Father&apos;s Email:</strong> {student?.fathersEmail}</p>
+            <p><strong>Mother&apos;s Email:</strong> {student?.mothersEmail}</p>
           </div>
         </div>
         <div className="mb-4">
@@ -239,16 +275,17 @@ const StudentProfile = ({studentId}) => {
           {student?.pdcChecks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {student?.pdcChecks.map((check, index) => (
-                <div key={index} className="border border-slate-400 rounded-lg p-4 ">
+                <div key={index} className="border border-slate-400 rounded-lg p-4">
                   <p><strong>Cheque Amount:</strong> {check?.pdcAmount}</p>
                   <p><strong>Cheque Number:</strong> {check?.pdcChqNo}</p>
                   <p><strong>Bank Name:</strong> {check?.pdcBankName}</p>
                   <p><strong>Cheque Date:</strong> {check?.pdcChqDate}</p>
                   <p><strong>Cheque Remarks:</strong>{check?.pdcRemark}</p>
                   <p><strong>Cheque Given Name:</strong>{check?.pdcGivenName}</p>
+                  
                   <button
                     onClick={() => handleCollected( check.pdcChqNo)}
-                    className={`mr-2 mt-2 px-2 py-1 ${check.collected ? "bg-green-400" : "bg-red-400"} text-white rounded`}
+                    className={`mr-2 mt-2 px-2 py-1 ${check.collected ? "bg-green-400" : "bg-blue-400"} text-white rounded`}
                     disabled={check.collected}
                   >
                     {check?.collected == true ? "Collected" : "Collect"}
@@ -256,12 +293,26 @@ const StudentProfile = ({studentId}) => {
                   {check?.collected && (
                     <button
                       onClick={() => handleUndo( check.pdcChqNo)}
-                      className="px-2 py-1 bg-yellow-400 text-white rounded"
+                      className="px-2 py-1 mr-2 bg-orange-400 text-white rounded"
                     >
                       Undo
                     </button>
                   )}
+                   <button
+                   onClick = {() => handleEdit(check)}
+                    className={`mr-2 mt-2 px-2 py-1 bg-yellow-400 text-white rounded`}
+                  >
+                    Edit
+                  </button>
+                  {isOpen && <UpdatePDC isOpen={isOpen} onClose={handleOnClose} data={check}/>}
+                  <button
+                   onClick = {() => handleDelete(check.pdcId)}
+                    className={`mr-2 mt-2 px-2 py-1 bg-red-400 text-white rounded`}
+                  >
+                    Delete
+                  </button>
                 </div>
+            
               ))}
             </div>
           ) : (
@@ -281,10 +332,10 @@ const StudentProfile = ({studentId}) => {
           className="bg-green-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mr-2"
         >
           Update Profile
-        </button>
+        </button>-
         {/* <button
-          onClick={handleSendReminder}
-          className="bg-green-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
+          onClick={handleSetReminder}
+          className="bg-yellow-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
         >
           Send Reminder
         </button> */}
@@ -292,6 +343,5 @@ const StudentProfile = ({studentId}) => {
     </div>
   );
 };
-
 
 export default StudentProfile;

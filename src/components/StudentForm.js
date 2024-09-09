@@ -9,6 +9,7 @@ import axios from 'axios';
 
 const StudentForm = () => {
   const [formData, setFormData] = useState({
+    id: '',
     studentName: '',
     email: '',
     currentStudy: '',
@@ -84,26 +85,26 @@ const StudentForm = () => {
   const validateForm = () => {
     const { loanGiven, pdcChecks, mobileStud, mobileFat, mobileMot, email, initialChqNo, blankChqNo, fatEmail, motEmail } = formData;
 
-    if (!validateEmail(email) || !validateEmail(motEmail) || !validateEmail(fatEmail)) {
-      toast.error('Invalid email address.');
-      return false;
-    }
+    // if (!validateEmail(email) || !validateEmail(motEmail) || !validateEmail(fatEmail)) {
+    //   toast.error('Invalid email address.');
+    //   return false;
+    // }
 
-    if (!validateMobile(mobileStud) || !validateMobile(mobileFat) || !validateMobile(mobileMot)) {
-      toast.error('Invalid mobile number. Please enter a 10-digit number.');
-      return false;
-    }
+    // if (!validateMobile(mobileStud) || !validateMobile(mobileFat) || !validateMobile(mobileMot)) {
+    //   toast.error('Invalid mobile number. Please enter a 10-digit number.');
+    //   return false;
+    // }
 
-    if (!validateChequeNumber(initialChqNo) || !validateChequeNumber(blankChqNo) || !pdcChecks.every(check => validateChequeNumber(check.pdcChqNo))) {
-      toast.error('Cheque number must be at least 6 digits.');
-      return false;
-    }
+    // if (!validateChequeNumber(initialChqNo) || !validateChequeNumber(blankChqNo) || !pdcChecks.every(check => validateChequeNumber(check.pdcChqNo))) {
+    //   toast.error('Cheque number must be at least 6 digits.');
+    //   return false;
+    // }
 
-    const totalPDCAmount = pdcChecks.reduce((total, check) => total + parseFloat(check.pdcAmount || 0), 0);
-    if (totalPDCAmount !== parseFloat(loanGiven)) {
-      toast.error('Total PDC amount must equal the loan amount given.');
-      return false;
-    }
+    // const totalPDCAmount = pdcChecks.reduce((total, check) => total + parseFloat(check.pdcAmount || 0), 0);
+    // if (totalPDCAmount !== parseFloat(loanGiven)) {
+    //   toast.error('Total PDC amount must equal the loan amount given.');
+    //   return false;
+    // }
 
     const uniqueChequeNumbers = new Set(pdcChecks.map(check => check.pdcChqNo));
     if (uniqueChequeNumbers.size !== pdcChecks.length) {
@@ -118,7 +119,7 @@ const StudentForm = () => {
     e.preventDefault();
     if (validateForm()) {
       const {
-        studentName, email, currentStudy, courseDuration, courseEndDate,
+        id,studentName, email, currentStudy, courseDuration, courseEndDate,
         initialChqDate, initialBankName, initialChqNo, loanGiven,
         blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
         mobileStud, mobileFat, mobileMot, pdcChecks, motEmail, fatEmail, motName, fatName
@@ -127,6 +128,7 @@ const StudentForm = () => {
       // Format data for the backend
       const formattedData = {
         general: {
+          id:id,
           name: studentName,
           email,
           current_study: currentStudy,
@@ -164,6 +166,7 @@ const StudentForm = () => {
         const response = await axios.post('http://localhost:8000/api/students/add/', formattedData);
         if (response.status === 201 || response.status === 200) {
           toast.success('Form submitted successfully!');
+          router.push('/');
         } else {
           toast.error('Failed to submit the form. Please try again.');
         }
@@ -173,10 +176,15 @@ const StudentForm = () => {
       }
     }
   };
+  
+  const handleBackToDashboard = (event) => {
+    event.preventDefault();
+    router.push('/');
+  };
 
   const handleExport = () => {
     const {
-      studentName, email, currentStudy, courseDuration, courseEndDate,
+      id,studentName, email, currentStudy, courseDuration, courseEndDate,
       initialChqDate, initialBankName, initialChqNo, loanGiven,
       blankChqAmount, blankChqDate, blankChqBankName, blankChqNo,
       mobileStud, mobileFat, mobileMot, pdcChecks, motEmail, fatEmail, motName, fatName
@@ -184,7 +192,7 @@ const StudentForm = () => {
   
     // Create the main row with basic student information
     const mainData = {
-      "Sr.": 1,
+      "Id": id,
       "Student Name": studentName,
       "Email": email,
       "Current Study": currentStudy,
@@ -209,7 +217,7 @@ const StudentForm = () => {
   
     // Create a header for the worksheet
     const header = [
-      "Sr.", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
+      "ID", "Student Name", "Email", "Current Study", "Course Duration", "Course End Date",
       "Initial Cheque Date", "Initial Bank Name", "Initial Cheque Number", "Loan Given",
       "PDC Cheque Amount", "PDC Cheque Number", "PDC Bank Name", "PDC Cheque Date", "PDC Remarks","PDC Chq Given Name",
       "Sec. Dep. Chq Amount", "Sec. Dep. Chq Date", "Sec. Dep. Chq Bank Name", "Sec. Dep. Chq Number",
@@ -233,7 +241,7 @@ const StudentForm = () => {
     // Add PDC data as separate rows with empty values for non-PDC fields
     pdcData.forEach((pdc) => {
       rows.push({
-        "Sr.": '',
+        "ID.": '',
         "Student Name": '',
         "Email": '',
         "Current Study": '',
@@ -296,11 +304,21 @@ const StudentForm = () => {
     <form className="p-6  shadow-md w-full max-w-7xl mx-auto">
       <ToastContainer />
       <button
-        onClick={() => router.push('/')}
+        onClick={handleBackToDashboard}
         className="mb-4 -ml-2   py-2 px-4 rounded  focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
       > 
         &larr; Back to Dashboard
       </button>
+      <div className="mb-4">
+        <label className="block text-sm font-bold mb-2">ID</label>
+        <input
+          name="id"
+          type="number"
+          value={formData.id}
+          onChange={handleInputChange}
+          className="input input-bordered w-full"
+        />
+      </div>
       <div className="mb-4">
         <label className="block text-sm font-bold mb-2">Student Name</label>
         <input

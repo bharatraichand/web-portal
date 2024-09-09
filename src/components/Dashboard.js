@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useRef} from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as XLSX from 'xlsx';
@@ -16,7 +16,8 @@ const Dashboard = () => {
   const [showPDC, setShowPDC] = useState({});
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-
+  const [excelFile, setExcelFile] = useState(null);
+  const fileInputRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -318,6 +319,33 @@ const Dashboard = () => {
     XLSX.writeFile(wb, "StudentData.xlsx");
   };
 
+  const handleExcel = async (event) => {
+   const file = event.target.files[0];
+    if (file) {
+      console.log(file , "Hello");
+      const formData = new FormData();
+      formData.append('file', file);
+      console.log(formData);
+    try {
+        const response = await axios.post('http://localhost:8000/api/process_excel/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        console.log(response);
+        if (response.data.status === 'success') {
+            console.log(`Excel Uploaded`);
+        } else {
+            toast.error("Failed to process the Excel file.");
+        }
+    } catch (error) {
+        console.error("Error uploading the Excel file:", error);
+        toast.error("Error uploading the Excel file.");
+    }}
+};
+const handleClick = () => {
+  fileInputRef.current.click();
+};
   const calculateTotalPDCForMonth = () => {
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -387,7 +415,7 @@ const Dashboard = () => {
         )}
         <button
           onClick={() => router.push("/form")}
-          className="mb-4 px-4 py-2 bg-green-800 text-white rounded"
+          className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
         >
           Add Student
         </button>
@@ -399,7 +427,7 @@ const Dashboard = () => {
         </button>
         <button
           onClick={() => handleExport(filteredStudents)}
-          className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
+          className="mb-4 px-4 py-2 bg-green-800 text-white rounded"
         >
           Export to Excel
         </button>
@@ -410,7 +438,23 @@ const Dashboard = () => {
           Report Page
         </button>
 
-      </div>
+        <div>
+      <input
+        type="file"
+        accept=".xlsx, .xls"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleExcel}
+      />
+      <button
+        className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
+        type="button"
+        onClick={handleClick}
+      >
+        Excel to Data
+      </button>
+    </div>
+  </div>
       <div className="mb-4">
         <span className="font-bold">Total PDC Amount for this Month: </span>
         {calculateTotalPDCForMonth()}

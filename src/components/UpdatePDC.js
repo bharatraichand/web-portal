@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 
-const UpdatePDC = ({ isOpen, onClose ,data}) => {
+const UpdatePDC = ({ isOpen, onClose , data}) => {
   const [formData, setFormData] = useState({
     pdcAmount: '',
     pdcChqNo: '',
@@ -61,7 +61,7 @@ const UpdatePDC = ({ isOpen, onClose ,data}) => {
                     pdc_chq_no: formData?.pdcChqNo,
                     pdc_bank_name: formData?.pdcBankName,
                     pdc_chq_date: formData?.pdcChqDate,
-                    pdc_remark:formData?.pdcRemark,
+                    remark:formData?.pdcRemark,
                     state:formData?.state,
                     pdc_given_name:formData?.pdcGivenName,
                 }

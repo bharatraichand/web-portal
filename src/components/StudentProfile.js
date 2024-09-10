@@ -15,6 +15,7 @@ const StudentProfile = ({studentId}) => {
   let {students} = useStudentsData();
   const [student, setStudent] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const router = useRouter();
 
   useEffect(()=>{
@@ -212,14 +213,17 @@ const StudentProfile = ({studentId}) => {
     });
 };
   const handleEdit = (check) => {
-   setIsOpen(true);
+   setIsEdit(true);
 };
-const handleSetReminder = async () => {}
+
 const handleAddPdc = async () => {
   setIsOpen(true);
 }
 const handleOnClose = () => {
   setIsOpen(false);
+}
+const handleEditClose  = () => {
+  setIsEdit(false);
 }
   return (
     <div className="container mx-auto p-4">
@@ -304,7 +308,7 @@ const handleOnClose = () => {
                   >
                     Edit
                   </button>
-                  {isOpen && <UpdatePDC isOpen={isOpen} onClose={handleOnClose} data={check}/>}
+                  {isEdit && <UpdatePDC isOpen={isEdit} onClose={handleEditClose} data={check}/>}
                   <button
                    onClick = {() => handleDelete(check.pdcId)}
                     className={`mr-2 mt-2 px-2 py-1 bg-red-400 text-white rounded`}
@@ -333,12 +337,6 @@ const handleOnClose = () => {
         >
           Update Profile
         </button>-
-        {/* <button
-          onClick={handleSetReminder}
-          className="bg-yellow-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
-        >
-          Send Reminder
-        </button> */}
       </div>
     </div>
   );

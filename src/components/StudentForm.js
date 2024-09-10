@@ -137,19 +137,18 @@ const StudentForm = () => {
           mobile_stu: mobileStud,
           mobile_fat: mobileFat,
           mobile_mot: mobileMot,
-          blank_chq_amount: blankChqAmount,
-          blank_chq_date: blankChqDate,
-          blank_chq_bank_name: blankChqBankName,
-          blank_chq_no: blankChqNo,
+          loan_rep_sec_chq_amt: blankChqAmount,
+          loan_rep_sec_chq_date: blankChqDate,
+          loan_rep_sec_chq_bank_name: blankChqBankName,
+          loan_rep_sec_chq_no: blankChqNo,
           initial_chq_date: initialChqDate,
           initial_bank_name: initialBankName,
           initial_chq_no: initialChqNo,
           loanamt: loanGiven,
-          father_name: fatName,
-          father_email: fatEmail,
-          mother_email: motEmail,
-          mother_name: motName
-          
+          fathers_name: fatName,
+          fathers_mail: fatEmail,
+          mothers_mail: motEmail,
+          mothers_name: motName      
         },
         pdc: pdcChecks.map(check => ({
           pdc_amount: check?.pdcAmount,

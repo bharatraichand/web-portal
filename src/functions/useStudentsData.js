@@ -38,6 +38,8 @@ const useStudentsData = () => {
           pdcAmount: check.pdcAmount,
           pdcChqNo: check.pdcChqNo,
           pdcBankName: check.pdcBankName,
+          pdcGivenName: check.pdcGivenName,
+          pdcRemark: check.pdcRemark,
           pdcChqDate: new Date(check.pdcChqDate).toLocaleDateString('en-GB'),
           collected: check.state === 1
           // do i make fields for remark and givenName

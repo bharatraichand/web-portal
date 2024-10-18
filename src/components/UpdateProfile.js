@@ -102,7 +102,7 @@ const UpdateProfile = ({studentId}) => {
         initialBankName: data?.general?.initial_bank_name,
         initialChqNo: data?.general?.initial_chq_no,
         loanGiven: data?.general?.loanamt,
-        blankChqAmount: data?.general?.loan_rep_sec_chq_amount,
+        blankChqAmount: data?.general?.loan_rep_sec_chq_amt,
         blankChqDate: data?.general?.loan_rep_sec_chq_date,
         blankChqBankName: data?.general?.loan_rep_sec_chq_bank_name,
         blankChqNo: data?.general?.loan_rep_sec_chq_no,
@@ -147,18 +147,18 @@ const UpdateProfile = ({studentId}) => {
           mobile_stu: mobileStud,
           mobile_fat: mobileFat,
           mobile_mot: mobileMot,
-          blank_chq_amount: blankChqAmount,
-          blank_chq_date: blankChqDate,
-          blank_chq_bank_name: blankChqBankName,
-          blank_chq_no: blankChqNo,
+          loan_rep_sec_chq_amt: blankChqAmount,
+          loan_rep_sec_chq_date: blankChqDate,
+          loan_rep_sec_chq_bank_name: blankChqBankName,
+          loan_rep_sec_chq_no: blankChqNo,
           initial_chq_date: initialChqDate,
           initial_bank_name: initialBankName,
           initial_chq_no: initialChqNo,
           loanamt: loanGiven,
-          father_name: fatName,
-          father_email: fatEmail,
-          mother_email: motEmail,
-          mother_name: motName
+          fathers_name: fatName,
+          fathers_mail: fatEmail,
+          mothers_mail: motEmail,
+          mothers_name: motName
       };
       
   
@@ -166,6 +166,7 @@ const UpdateProfile = ({studentId}) => {
         const response = await axios.post('http://localhost:8000/api/students/update/', formattedData);
         if (response.status === 200) {
           toast.success('Form submitted successfully!');
+          router.push('/student/'+studentId);
         } else {
           toast.error('Failed to submit the form. Please try again.');
         }

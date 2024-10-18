@@ -16,6 +16,7 @@ const StudentProfile = ({studentId}) => {
   const [student, setStudent] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [currentCheck, setCurrentCheck] = useState(null);
   const router = useRouter();
 
   useEffect(()=>{
@@ -213,6 +214,7 @@ const StudentProfile = ({studentId}) => {
     });
 };
   const handleEdit = (check) => {
+    setCurrentCheck(check); 
    setIsEdit(true);
 };
 
@@ -224,6 +226,8 @@ const handleOnClose = () => {
 }
 const handleEditClose  = () => {
   setIsEdit(false);
+  setCurrentCheck(null);
+
 }
   return (
     <div className="container mx-auto p-4">
@@ -308,7 +312,9 @@ const handleEditClose  = () => {
                   >
                     Edit
                   </button>
-                  {isEdit && <UpdatePDC isOpen={isEdit} onClose={handleEditClose} data={check}/>}
+                  {isEdit && currentCheck && (
+        <UpdatePDC isOpen={isEdit} onClose={handleEditClose} data={currentCheck} />  // Pass current check to modal
+      )}
                   <button
                    onClick = {() => handleDelete(check.pdcId)}
                     className={`mr-2 mt-2 px-2 py-1 bg-red-400 text-white rounded`}

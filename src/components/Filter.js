@@ -20,10 +20,10 @@ const Filter = () => {
 
   const router = useRouter();
 
-  useEffect(() => {
-    // Load dummy data
-    setFilteredStudents(students);
-  }, []);
+  // useEffect(() => {
+  //   // Load dummy data
+  //   setFilteredStudents(students);
+  // }, []);
 
   useEffect(()=>{
     if(filteredStudents?.length==0)setFilteredStudents(students)
@@ -272,7 +272,7 @@ const Filter = () => {
     studs.forEach(student => {
       student.pdcChecks.forEach(check => {
         const [day, month, year] = check.pdcChqDate.split('/');
-        const checkDate = new Date(`${month}/${day}/${year}`);
+        const checkDate = new Date(`${year}-${month}-${day}`);
         if (checkDate >= startOfMonth && checkDate <= endOfMonth && !check.collected) {
           total += check.pdcAmount;
         }
@@ -285,36 +285,44 @@ const Filter = () => {
   const filterStudentsByDate = (students, startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-
-    if(startDate!='' && endDate!=''){
-        return students.filter(student => {
-            return student.pdcChecks.some(check => {
-              const [day, month, year] = check.pdcChqDate.split('/');
-              const checkDate = new Date(`${month}/${day}/${year}`);
-              return checkDate >= start && checkDate <= end;
-            });
-          });
+  
+    // If both startDate and endDate are provided
+    if (startDate !== '' && endDate !== '') {
+      return students.map(student => {
+        // Filter the pdcChecks for each student
+        const filteredPDCs = student.pdcChecks.filter(check => {
+          const [day, month, year] = check.pdcChqDate.split('/');
+          const checkDate = new Date(`${year}-${month}-${day}`);
+          return checkDate >= start && checkDate <= end;
+        });
+  
+        // Only return students with PDCs that match the filter
+        if (filteredPDCs.length > 0) {
+          return {
+            ...student,
+            pdcChecks: filteredPDCs
+          };
+        }
+  
+        return null; // Return null if no PDC checks match
+      }).filter(student => student !== null); // Remove null entries (students without matching PDCs)
     }
-
-    else return students;
-    
+  
+    // If no date range is provided, return all students
+    return students;
   };
+  
 
   const handleFilterByDate = () => {
-    const filtered = filterStudentsByDate(students, startDate, endDate);
-    setFilteredStudents(filtered);
+      const filtered = filterStudentsByDate(students, startDate, endDate);
+      console.log(filtered)
+      setFilteredStudents(filtered);
+      calculateTotalPDCForMonth(filtered);
   };
 
-  useEffect(()=>{
-    if(startDate!='' && endDate!=''){
-        handleFilterByDate();
-        calculateTotalPDCForMonth(students);
-    }
-    else if(startDate=='' && endDate==''){
-        setFilteredStudents(oldStudents);
-        calculateTotalPDCForMonth(students);
-    }
-  },[startDate,endDate])
+  // useEffect(()=>{
+ 
+  // },[startDate,endDate])
 
   return (
     <div className="container mx-auto p-4">
@@ -326,10 +334,11 @@ const Filter = () => {
         &larr; Back to Dashboard
       </button>
       <h1 className="text-2xl font-bold mb-4">Student Filter</h1>
+      {(startDate!='' && endDate!='') && (
       <div className="mb-4">
         <span className="font-bold">Total PDC Amount between the selected dates: </span>
         {pdcAmount}
-      </div>
+      </div>)}
       <div className="flex flex-col md:flex-row items-center justify-between p-4  rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
           <label className="flex flex-col md:flex-row items-start md:items-center w-full">
@@ -354,17 +363,19 @@ const Filter = () => {
             onClick={()=>{
                 setStartDate('');
                 setEndDate('');
+                setFilteredStudents(oldStudents);
+                calculateTotalPDCForMonth(oldStudents);
             }}
             className="w-full md:w-auto px-4 py-2 bg-red-600 text-white font-semibold rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
           >
             Remove Filter
           </button>
-          {/* <button
+          {<button
             onClick={handleFilterByDate}
             className="w-full md:w-auto px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             Filter
-          </button> */}
+          </button> }
         </div>
       </div>
 
@@ -393,12 +404,7 @@ const Filter = () => {
                 {showPDC[student.id] && (
                   <div className="mt-2 ">
                     {student.pdcChecks.map(check => {
-                        const [day, month, year] = check.pdcChqDate.split('/');
-                        const checkDate = new Date(`${month}/${day}/${year}`);
-                        const start = new Date(startDate);
-                        const end = new Date(endDate);
-                        if ((startDate=='' || endDate=='') || (startDate!='' && endDate!='' && checkDate >= start && checkDate <= end)) {
-                        
+                    
                         return(
                       <div key={check.pdcChqNo} className="mb-2 flex space-x-4">
                         <div>
@@ -424,7 +430,6 @@ const Filter = () => {
                         )}
                       </div>
                     )
-                    }
                 })
                 }
                   </div>
